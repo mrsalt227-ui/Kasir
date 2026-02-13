@@ -3,57 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kasir Pintar + Laporan</title>
+    <title>Sistem Kasir Pintar</title>
     <style>
-        :root { --primary: #2563eb; --dark: #1e293b; --bg: #f8fafc; --success: #22c55e; --orange: #f59e0b; }
+        :root { --primary: #2563eb; --dark: #1e293b; --bg: #f1f5f9; --success: #22c55e; --orange: #f59e0b; --danger: #ef4444; }
         body { font-family: 'Inter', sans-serif; margin: 0; background: var(--bg); color: var(--dark); }
-        .nav-bar { background: var(--dark); display: flex; justify-content: center; padding: 10px; position: sticky; top: 0; z-index: 100; }
+        
+        /* Navbar */
+        .nav-bar { background: var(--dark); display: none; justify-content: center; padding: 10px; position: sticky; top: 0; z-index: 100; }
         .nav-bar button { background: transparent; color: white; border: none; padding: 10px 15px; margin: 0 5px; cursor: pointer; border-radius: 5px; font-weight: bold; }
         .nav-bar button.active { background: var(--primary); }
+
+        /* Home / Login Screen */
+        #view-home { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+        .login-box { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 350px; }
+
+        /* General UI */
         .view { display: none; padding: 20px; max-width: 1000px; margin: auto; }
         .view.active { display: block; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
-        button.main-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .order-card { background: white; border-top: 5px solid var(--orange); padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: var(--dark); color: white; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
+        button.main-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        
+        /* Laporan Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; font-size: 14px; }
+        th { background: var(--dark); color: white; }
+
+        .btn-reset { background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 15px; }
+        .remember-me { display: flex; align-items: center; gap: 8px; font-size: 14px; margin: 10px 0; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="nav-bar">
-        <button id="btn-kasir" class="active" onclick="checkPass('kasir')">📱 KASIR</button>
-        <button id="btn-dapur" onclick="checkPass('dapur')">👨‍🍳 DAPUR</button>
-        <button id="btn-laporan" onclick="checkPass('laporan')">📊 LAPORAN</button>
+    <div id="view-home" class="view active">
+        <div class="login-box">
+            <h1 style="color: var(--primary); margin-bottom: 5px;">Kasirku</h1>
+            <p style="color: #64748b; margin-bottom: 20px;">Silakan masuk untuk melanjutkan</p>
+            
+            <input type="password" id="pass-input" placeholder="Masukkan Password">
+            
+            <label class="remember-me">
+                <input type="checkbox" id="remember-check" style="width: auto;"> Ingat saya di perangkat ini
+            </label>
+
+            <button class="main-btn" onclick="handleLogin()">MASUK KE SISTEM</button>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 20px;">Default Pass: 1234</p>
+        </div>
     </div>
 
-    <div id="view-kasir" class="view active">
-        <div class="card" style="max-width: 400px; margin: auto;">
+    <div class="nav-bar" id="main-nav">
+        <button id="btn-kasir" onclick="switchView('kasir')">📱 KASIR</button>
+        <button id="btn-dapur" onclick="switchView('dapur')">👨‍🍳 DAPUR</button>
+        <button id="btn-laporan" onclick="switchView('laporan')">📊 LAPORAN</button>
+        <button onclick="logout()" style="color: #fda4af;">🚪 KELUAR</button>
+    </div>
+
+    <div id="view-kasir" class="view">
+        <div class="card" style="max-width: 450px; margin: auto;">
             <h2>Input Pesanan</h2>
             <input type="number" id="meja" placeholder="Nomor Meja">
-            <textarea id="pesanan" rows="4" placeholder="Detail Pesanan..."></textarea>
+            <textarea id="pesanan" rows="4" placeholder="Contoh: 2 Kopi Susu, 1 Roti Bakar"></textarea>
             <button class="main-btn" onclick="kirimPesanan()">KIRIM KE DAPUR</button>
         </div>
     </div>
 
     <div id="view-dapur" class="view">
-        <h1>Antrean Dapur</h1>
-        <div class="grid" id="list-pesanan"></div>
+        <h1 style="text-align: center;">Pesanan Aktif (Dapur)</h1>
+        <div id="list-pesanan" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;"></div>
     </div>
 
     <div id="view-laporan" class="view">
-        <h1>Laporan Penjualan (Selesai)</h1>
-        <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Laporan Selesai</h1>
+            <button class="btn-reset" onclick="resetLaporan()">RESET SEMUA LAPORAN</button>
+        </div>
+        <div class="card" style="overflow-x: auto;">
             <table id="tabel-laporan">
                 <thead>
-                    <tr>
-                        <th>Waktu</th>
-                        <th>Meja</th>
-                        <th>Pesanan</th>
-                    </tr>
+                    <tr><th>Waktu</th><th>Meja</th><th>Pesanan</th></tr>
                 </thead>
                 <tbody></tbody>
             </table>
@@ -75,66 +103,74 @@
         };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const PASS_BENAR = "1234"; // GANTI PASSWORD DI SINI
+        const PASS_SISTEM = "1234";
 
-        function checkPass(mode) {
-            const input = prompt("Masukkan Password:");
-            if (input === PASS_BENAR) {
-                switchView(mode);
+        // --- LOGIKA LOGIN & REMEMBER ME ---
+        window.onload = function() {
+            if (localStorage.getItem("kasir_is_logged") === "true") {
+                showDashboard();
+            }
+        };
+
+        function handleLogin() {
+            const input = document.getElementById('pass-input').value;
+            const remember = document.getElementById('remember-check').checked;
+
+            if (input === PASS_SISTEM) {
+                if (remember) localStorage.setItem("kasir_is_logged", "true");
+                showDashboard();
             } else {
                 alert("Password Salah!");
             }
         }
 
+        function showDashboard() {
+            document.getElementById('view-home').style.display = 'none';
+            document.getElementById('main-nav').style.display = 'flex';
+            switchView('kasir');
+        }
+
+        function logout() {
+            localStorage.removeItem("kasir_is_logged");
+            location.reload();
+        }
+
+        // --- NAVIGASI ---
         function switchView(viewName) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-bar button').forEach(b => b.classList.remove('active'));
             document.getElementById('view-' + viewName).classList.add('active');
-            document.getElementById('btn-' + viewName).classList.add('active');
+            const btn = document.getElementById('btn-' + viewName);
+            if(btn) btn.classList.add('active');
         }
 
+        // --- FITUR KASIR ---
         function kirimPesanan() {
             const meja = document.getElementById('meja').value;
             const pesanan = document.getElementById('pesanan').value;
             if (meja && pesanan) {
                 database.ref('pesanan').push({
-                    meja, item: pesanan, waktu: new Date().toLocaleString()
+                    meja, item: pesanan, waktu: new Date().toLocaleString('id-ID')
                 }).then(() => {
-                    alert("Terkirim!");
+                    alert("Terkirim ke Dapur!");
                     document.getElementById('pesanan').value = '';
                 });
             }
         }
 
-        // Suara Notifikasi
-        let lastCount = 0;
-        function playSound() {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.frequency.value = 523.25; // Nada C5
-            osc.start(); gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 1);
-            osc.stop(audioCtx.currentTime + 1);
-        }
-
-        // Monitor Dapur
+        // --- FITUR DAPUR (Realtime) ---
         database.ref('pesanan').on('value', (snapshot) => {
             const list = document.getElementById('list-pesanan');
             list.innerHTML = '';
             const data = snapshot.val();
-            const count = data ? Object.keys(data).length : 0;
-            if (count > lastCount) playSound();
-            lastCount = count;
-
             if (data) {
                 Object.keys(data).forEach(id => {
                     const item = data[id];
                     list.innerHTML += `
-                        <div class="order-card">
-                            <h2>Meja ${item.meja}</h2>
-                            <p>${item.item}</p>
-                            <button class="main-btn" style="background:var(--success)" onclick="selesaikan('${id}')">Selesai</button>
+                        <div class="card" style="border-top: 5px solid var(--orange)">
+                            <h2 style="margin:0">Meja ${item.meja}</h2>
+                            <p style="font-size: 18px;">${item.item}</p>
+                            <button class="main-btn" style="background:var(--success)" onclick="selesaikan('${id}')">SELESAI</button>
                         </div>`;
                 });
             }
@@ -142,14 +178,12 @@
 
         function selesaikan(id) {
             database.ref('pesanan/' + id).once('value', (snap) => {
-                const data = snap.val();
-                // Pindahkan ke Laporan sebelum hapus dari antrean
-                database.ref('laporan').push(data);
+                database.ref('laporan').push(snap.val());
                 database.ref('pesanan/' + id).remove();
             });
         }
 
-        // Monitor Laporan
+        // --- FITUR LAPORAN & RESET ---
         database.ref('laporan').on('value', (snapshot) => {
             const tbody = document.querySelector('#tabel-laporan tbody');
             tbody.innerHTML = '';
@@ -160,6 +194,20 @@
                 });
             }
         });
+
+        function resetLaporan() {
+            const konfirmasi = confirm("APAKAH ANDA YAKIN? Semua riwayat laporan akan dihapus permanen.");
+            if (konfirmasi) {
+                const pass = prompt("Masukkan password admin untuk menghapus:");
+                if (pass === PASS_SISTEM) {
+                    database.ref('laporan').remove()
+                        .then(() => alert("Laporan berhasil dikosongkan!"))
+                        .catch((err) => alert("Gagal menghapus: " + err));
+                } else {
+                    alert("Password salah, reset dibatalkan.");
+                }
+            }
+        }
     </script>
 </body>
 </html>
