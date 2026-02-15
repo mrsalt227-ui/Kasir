@@ -3,23 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS System - Multi Role Access</title>
+    <title>POS Pro FIFO - Multi Role</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #2563eb; --dark: #0f172a; --bg: #f8fafc; --success: #10b981; --orange: #f59e0b; --danger: #ef4444; }
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { margin: 0; background: var(--bg); color: var(--dark); }
         
-        /* Navbar - Hidden by default */
         .nav-bar { background: var(--dark); display: none; flex-wrap: wrap; justify-content: center; padding: 10px; position: sticky; top: 0; z-index: 1000; }
-        .nav-bar button { background: transparent; color: #94a3b8; border: none; padding: 12px 15px; margin: 2px; cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 12px; }
+        .nav-bar button { background: transparent; color: #94a3b8; border: none; padding: 12px 15px; margin: 2px; cursor: pointer; border-radius: 8px; font-weight: 600; font-size: 11px; }
         .nav-bar button.active { background: var(--primary); color: white; }
 
-        .view { display: none; padding: 20px; max-width: 1000px; margin: auto; animation: fadeIn 0.3s ease; }
+        .view { display: none; padding: 20px; max-width: 1000px; margin: auto; }
         .view.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; transition: 0.3s; }
+        
+        /* Peringatan Warna Dapur (FIFO Timer) */
+        .timer-safe { border-left: 8px solid var(--success); }
+        .timer-warning { border-left: 8px solid var(--orange); background: #fffbeb; }
+        .timer-danger { border-left: 8px solid var(--danger); background: #fef2f2; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.8; } 100% { opacity: 1; } }
+
         .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
         .menu-item { border: 1px solid #e2e8f0; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; background: white; position: relative; }
         .stok-badge { background: var(--orange); color: white; padding: 2px 6px; border-radius: 6px; font-size: 10px; position: absolute; top: 5px; right: 5px; }
@@ -33,79 +38,70 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: left; }
         #receipt { font-family: 'Courier New', monospace; padding: 20px; border: 1px dashed #333; background: #fff; max-width: 300px; margin: 20px auto; }
-        .role-tag { font-size: 10px; background: #e2e8f0; padding: 2px 8px; border-radius: 10px; margin-bottom: 10px; display: inline-block; }
+        .time-badge { font-size: 11px; font-weight: bold; padding: 2px 6px; border-radius: 4px; background: #f1f5f9; }
     </style>
 </head>
 <body>
 
     <div id="view-home" class="view active">
-        <div style="max-width:350px; margin: 100px auto; text-align:center;" class="card">
-            <h1 style="color: var(--primary);">RESTO POS</h1>
-            <p>Masukkan PIN Akses Anda</p>
+        <div style="max-width:350px; margin: 80px auto; text-align:center;" class="card">
+            <h1 style="color: var(--primary);">RESTO POS v3</h1>
+            <p>Masukkan PIN Akses</p>
             <input type="password" id="pass-input" placeholder="****" style="letter-spacing: 15px;">
-            <button class="btn btn-primary" onclick="handleLogin()">LOGIN</button>
-            <div style="margin-top:20px; font-size: 11px; color: #94a3b8;">
-                Petunjuk: PIN Waiter(1111), Dapur(2222), Kasir(3333), Owner(4444)
-            </div>
+            <button class="btn btn-primary" onclick="handleLogin()">MASUK</button>
         </div>
     </div>
 
     <div class="nav-bar" id="main-nav">
-        <button id="nav-waiter" onclick="switchView('waiter')">ORDER</button>
-        <button id="nav-antar" onclick="switchView('antar')">ANTAR</button>
-        <button id="nav-dapur" onclick="switchView('dapur')">DAPUR</button>
-        <button id="nav-kasir" onclick="switchView('kasir')">KASIR</button>
-        <button id="nav-stok" onclick="switchView('stok')">GUDANG</button>
-        <button id="nav-laporan" onclick="switchView('laporan')">LAPORAN</button>
-        <button onclick="logout()" style="color: var(--danger);">KELUAR</button>
+        <button id="nav-waiter" onclick="switchView('waiter')">1. ORDER</button>
+        <button id="nav-antar" onclick="switchView('antar')">2. ANTAR</button>
+        <button id="nav-dapur" onclick="switchView('dapur')">👨‍🍳 DAPUR</button>
+        <button id="nav-kasir" onclick="switchView('kasir')">💰 KASIR</button>
+        <button id="nav-stok" onclick="switchView('stok')">📦 STOK</button>
+        <button id="nav-laporan" onclick="switchView('laporan')">📊 LAPORAN</button>
+        <button onclick="location.reload()" style="color: var(--danger);">KELUAR</button>
     </div>
 
     <div id="view-waiter" class="view">
-        <div class="role-tag">WAITER MODE</div>
         <div class="card">
-            <h2>Catat Pesanan</h2>
-            <input type="number" id="meja-input" placeholder="No Meja">
+            <h2>Buat Pesanan Baru</h2>
+            <input type="number" id="meja-input" placeholder="Nomor Meja">
             <div class="menu-grid" id="menu-container"></div>
         </div>
-        <div class="card" id="cart-container" style="display:none;">
+        <div class="card" id="cart-box" style="display:none;">
             <div id="cart-list"></div>
-            <button class="btn btn-primary" onclick="kirimPesanan()">KIRIM KE DAPUR</button>
+            <button class="btn btn-primary" onclick="kirimPesanan()">KIRIM KE DAPUR (FIFO)</button>
         </div>
     </div>
 
     <div id="view-antar" class="view">
-        <div class="role-tag">WAITER MODE</div>
-        <h2>Pesanan Siap Diantar</h2>
+        <h2>Siap Diantar ke Meja</h2>
         <div id="antar-container" class="menu-grid"></div>
     </div>
 
     <div id="view-dapur" class="view">
-        <div class="role-tag">KITCHEN MODE</div>
-        <h2>Antrean Masak</h2>
-        <div id="dapur-container" class="menu-grid"></div>
+        <h2>Antrean FIFO Dapur</h2>
+        <div id="dapur-container"></div>
     </div>
 
     <div id="view-kasir" class="view">
-        <div class="role-tag">CASHIER MODE</div>
-        <h2>Billing & Pembayaran</h2>
+        <h2>Billing Pembayaran</h2>
         <div id="kasir-container"></div>
         <div id="receipt-area" style="display:none; text-align:center;">
             <div id="receipt"></div>
-            <button class="btn btn-primary" onclick="window.print()">CETAK</button>
-            <button class="btn" onclick="closeReceipt()">SELESAI</button>
+            <button class="btn btn-primary" onclick="window.print()">PRINT STRUK</button>
+            <button class="btn" onclick="closeReceipt()">TUTUP</button>
         </div>
     </div>
 
     <div id="view-stok" class="view">
-        <div class="role-tag">CASHIER MODE</div>
-        <h2>Stok Gudang</h2>
+        <h2>Kontrol Stok</h2>
         <div class="card" id="stok-table-area"></div>
     </div>
 
     <div id="view-laporan" class="view">
-        <div class="role-tag">OWNER MODE</div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2>Laporan Penjualan</h2>
+            <h2>Laporan Owner</h2>
             <button onclick="resetLaporan()" class="btn-danger" style="width:auto; padding:5px 15px;">Reset</button>
         </div>
         <div class="card">
@@ -143,45 +139,34 @@
 
         let cart = [];
         let currentStok = {};
-        let userRole = "";
 
-        // --- LOGIN & ROLE SYSTEM ---
         function handleLogin() {
             const pin = document.getElementById('pass-input').value;
             const nav = document.getElementById('main-nav');
-            
-            // Sembunyikan semua tombol nav dulu
-            document.querySelectorAll('.nav-bar button').forEach(b => b.style.display = 'none');
-            document.getElementById('nav-waiter').parentElement.lastElementChild.style.display = 'block'; // Tombol Logout
+            const btns = document.querySelectorAll('.nav-bar button');
+            btns.forEach(b => b.style.display = 'none');
+            btns[btns.length-1].style.display = 'block';
 
             if(pin === "1111") { // WAITER
-                userRole = "waiter";
                 document.getElementById('nav-waiter').style.display = 'block';
                 document.getElementById('nav-antar').style.display = 'block';
                 switchView('waiter');
             } else if(pin === "2222") { // DAPUR
-                userRole = "dapur";
                 document.getElementById('nav-dapur').style.display = 'block';
                 switchView('dapur');
             } else if(pin === "3333") { // KASIR
-                userRole = "kasir";
                 document.getElementById('nav-kasir').style.display = 'block';
                 document.getElementById('nav-stok').style.display = 'block';
                 switchView('kasir');
             } else if(pin === "4444") { // OWNER
-                userRole = "owner";
-                document.getElementById('nav-laporan').style.display = 'block';
+                btns.forEach(b => b.style.display = 'block');
                 switchView('laporan');
-            } else {
-                return alert("PIN Salah!");
-            }
+            } else { return alert("PIN SALAH!"); }
 
             document.getElementById('view-home').style.display = 'none';
             nav.style.display = 'flex';
         }
 
-        function logout() { location.reload(); }
-        
         function switchView(v) {
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-bar button').forEach(el => el.classList.remove('active'));
@@ -189,7 +174,7 @@
             if(document.getElementById('nav-'+v)) document.getElementById('nav-'+v).classList.add('active');
         }
 
-        // --- LOGIC WAITER ---
+        // --- STOK ---
         db.ref('stok').on('value', snap => {
             currentStok = snap.val() || { m1:50, m2:50, m3:50, m4:50, m5:50 };
             renderMenu(); renderStokArea();
@@ -207,69 +192,80 @@
         }
 
         function addCart(k) {
-            if(currentStok[k] <= 0) return alert("Stok habis!");
+            if(currentStok[k] <= 0) return alert("Stok Habis!");
             cart.push({ id: k, ...MASTER_MENU[k] });
-            document.getElementById('cart-container').style.display = 'block';
-            document.getElementById('cart-list').innerHTML = cart.map(i => "• " + i.n).join("<br>");
+            document.getElementById('cart-box').style.display = 'block';
+            document.getElementById('cart-list').innerHTML = cart.map(i => "• "+i.n).join("<br>");
         }
 
         function kirimPesanan() {
             let meja = document.getElementById('meja-input').value;
-            if(!meja || cart.length === 0) return alert("Isi meja & menu!");
+            if(!meja || cart.length === 0) return alert("Meja/Menu kosong!");
 
             const payload = {
                 meja, items: cart,
                 total: cart.reduce((s, i) => s + i.h, 0),
-                waktu: new Date().toLocaleString('id-ID', {timeStyle:'short'}),
+                waktu: new Date().toLocaleTimeString('id-ID'),
+                timestamp: Date.now(), // Untuk FIFO
                 status: "dimasak"
             };
 
             cart.forEach(i => db.ref('stok/'+i.id).set(currentStok[i.id] - 1));
             db.ref('orders').push(payload);
-
-            alert("Pesanan dikirim ke dapur!");
             cart = []; document.getElementById('meja-input').value = "";
-            document.getElementById('cart-container').style.display = 'none';
+            document.getElementById('cart-box').style.display = 'none';
         }
 
-        // --- REALTIME DATA HANDLER ---
-        db.ref('orders').on('value', snap => {
-            const data = snap.val();
-            let dapurH = "", antarH = "", kasirH = "";
+        // --- LOGIKA FIFO & TIMER ---
+        setInterval(() => { if(document.getElementById('view-dapur').classList.contains('active')) refreshDapur(); }, 10000);
 
+        db.ref('orders').on('value', snap => {
+            window.lastData = snap.val();
+            refreshDapur();
+        });
+
+        function refreshDapur() {
+            const data = window.lastData;
+            let dapurH = "", antarH = "", kasirH = "";
             if(data) {
-                Object.keys(data).forEach(k => {
-                    const o = data[k];
+                // Konversi ke Array dan Urutkan (FIFO)
+                let arr = Object.keys(data).map(k => ({id: k, ...data[k]}));
+                arr.sort((a, b) => a.timestamp - b.timestamp);
+
+                arr.forEach(o => {
+                    const menit = Math.floor((Date.now() - o.timestamp) / 60000);
+                    let warna = "timer-safe";
+                    if(menit >= 5) warna = "timer-warning";
+                    if(menit >= 10) warna = "timer-danger";
+
                     const card = `
-                        <div class="card">
-                            <h3>Meja ${o.meja}</h3>
+                        <div class="card ${o.status === 'dimasak' ? warna : ''}">
+                            <div style="display:flex; justify-content:space-between">
+                                <b>MEJA ${o.meja}</b>
+                                <span class="time-badge">${menit} Menit</span>
+                            </div>
                             <p>${o.items.map(i => i.n).join(", ")}</p>
-                            ${o.status === 'dimasak' ? `<button class="btn btn-primary" onclick="updateStatus('${k}', 'siap')">MASAK SELESAI</button>` : ''}
-                            ${o.status === 'siap' ? `<button class="btn btn-success" onclick="updateStatus('${k}', 'diantar')">SUDAH DIANTARKAN</button>` : ''}
-                            ${o.status === 'diantar' ? `<b>Rp ${o.total.toLocaleString()}</b><button class="btn btn-primary" onclick="bayar('${k}')">BUAT STRUK/BAYAR</button>` : ''}
+                            ${o.status === 'dimasak' ? `<button class="btn btn-primary" onclick="db.ref('orders/${o.id}/status').set('siap')">SIAP SAJI</button>` : ''}
+                            ${o.status === 'siap' ? `<button class="btn btn-success" onclick="db.ref('orders/${o.id}/status').set('diantar')">DIANTARKAN</button>` : ''}
+                            ${o.status === 'diantar' ? `<button class="btn btn-primary" onclick="bayar('${o.id}')">BAYAR Rp${o.total.toLocaleString()}</button>` : ''}
                         </div>`;
-                    
+
                     if(o.status === 'dimasak') dapurH += card;
                     if(o.status === 'siap') antarH += card;
                     if(o.status === 'diantar') kasirH += card;
                 });
             }
-            document.getElementById('dapur-container').innerHTML = dapurH || "Kosong";
-            document.getElementById('antar-container').innerHTML = antarH || "Belum ada pesanan siap antar";
-            document.getElementById('kasir-container').innerHTML = kasirH || "Menunggu pesanan diantarkan...";
-        });
-
-        function updateStatus(k, status) { db.ref('orders/'+k+'/status').set(status); }
+            document.getElementById('dapur-container').innerHTML = dapurH || "Dapur Bersih!";
+            document.getElementById('antar-container').innerHTML = antarH || "Kosong";
+            document.getElementById('kasir-container').innerHTML = kasirH || "Kosong";
+        }
 
         function bayar(k) {
             db.ref('orders/'+k).once('value', snap => {
-                const data = snap.val();
-                db.ref('laporan').push(data).then(() => {
+                const d = snap.val();
+                db.ref('laporan').push(d).then(() => {
                     db.ref('orders/'+k).remove();
-                    let s = `<b>STRUK RESTO</b><br>Meja: ${data.meja}<br>------------------<br>`;
-                    data.items.forEach(i => s += `${i.n} - ${i.h}<br>`);
-                    s += `------------------<br><b>TOTAL: Rp ${data.total.toLocaleString()}</b>`;
-                    document.getElementById('receipt').innerHTML = s;
+                    document.getElementById('receipt').innerHTML = `<b>STRUK</b><br>${d.waktu}<br>Meja: ${d.meja}<hr>Total: Rp${d.total.toLocaleString()}`;
                     document.getElementById('receipt-area').style.display = 'block';
                     document.getElementById('kasir-container').style.display = 'none';
                 });
@@ -277,33 +273,32 @@
         }
 
         function closeReceipt() { 
-            document.getElementById('receipt-area').style.display = 'none'; 
-            document.getElementById('kasir-container').style.display = 'block'; 
+            document.getElementById('receipt-area').style.display='none'; 
+            document.getElementById('kasir-container').style.display='block'; 
         }
 
-        // --- STOK & LAPORAN ---
         function renderStokArea() {
-            let h = "<table><tr><th>Menu</th><th>Stok</th><th>Aksi</th></tr>";
+            let h = "<table>";
             for(let k in MASTER_MENU) {
                 h += `<tr><td>${MASTER_MENU[k].n}</td><td>${currentStok[k]}</td>
-                <td><button onclick="db.ref('stok/${k}').set(parseInt(prompt('Set stok:')))">Set</button></td></tr>`;
+                <td><button onclick="db.ref('stok/${k}').set(parseInt(prompt('Set:')))">Set</button></td></tr>`;
             }
             document.getElementById('stok-table-area').innerHTML = h + "</table>";
         }
 
         db.ref('laporan').on('value', snap => {
-            const data = snap.val(); let h = "", total = 0;
+            const data = snap.val(); let h = "", t = 0;
             if(data) {
                 Object.values(data).reverse().forEach(l => {
-                    total += l.total;
+                    t += l.total;
                     h += `<tr><td>${l.waktu}</td><td>${l.meja}</td><td>${l.total.toLocaleString()}</td></tr>`;
                 });
             }
             document.getElementById('lap-body').innerHTML = h;
-            document.getElementById('lap-omzet').innerText = "Total: Rp " + total.toLocaleString();
+            document.getElementById('lap-omzet').innerText = "Total: Rp " + t.toLocaleString();
         });
 
-        function resetLaporan() { if(confirm("Hapus laporan?")) db.ref('laporan').remove(); }
+        function resetLaporan() { if(confirm("Reset?")) db.ref('laporan').remove(); }
     </script>
 </body>
 </html>
