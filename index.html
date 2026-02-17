@@ -3,159 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS RESTO PRO - v4.7</title>
+    <title>RESTO PRO ULTIMATE - FINAL v6.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --primary: #4f46e5; --primary-hover: #4338ca;
-            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
-            --dark: #1e293b; --light-bg: #f1f5f9; --card-bg: #ffffff;
-        }
-        
-        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.2s ease; }
-        body { margin: 0; background: var(--light-bg); color: var(--dark); overflow-x: hidden; }
-
-        /* Navigasi Modern */
-        .nav-bar { 
-            background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(10px);
-            display: none; justify-content: center; padding: 12px; 
-            position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .nav-bar button { 
-            background: transparent; color: #94a3b8; border: none; padding: 10px 18px; 
-            margin: 0 4px; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 13px; 
-        }
-        .nav-bar button.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
-
-        /* Views */
-        .view { display: none; padding: 25px; max-width: 1100px; margin: auto; opacity: 0; transform: translateY(10px); }
-        .view.active { display: block; opacity: 1; transform: translateY(0); }
-
-        /* Modern Cards */
-        .card { 
-            background: var(--card-bg); padding: 24px; border-radius: 16px; 
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); margin-bottom: 24px; border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-        h3 { margin-top: 0; color: var(--dark); font-weight: 700; display: flex; align-items: center; gap: 8px; }
-
-        /* Grid Menu & Stok Real-time */
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
-        .menu-item { 
-            background: white; border: 1px solid #e2e8f0; padding: 20px; border-radius: 20px; 
-            text-align: center; cursor: pointer; position: relative; overflow: hidden;
-        }
-        .menu-item:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 12px 20px rgba(0,0,0,0.08); }
-        .menu-item:active { transform: scale(0.95); }
-        
-        .stock-indicator { 
-            position: absolute; top: 10px; right: 10px; padding: 4px 8px; 
-            border-radius: 8px; font-size: 10px; font-weight: 700; 
-        }
-        .stock-safe { background: #dcfce7; color: var(--success); }
-        .stock-low { background: #fef3c7; color: var(--warning); }
-        .stock-empty { background: #fee2e2; color: var(--danger); }
-
-        /* Cart Floating */
-        #cart-box { border-left: 5px solid var(--primary); position: relative; background: #f8faff; }
-        .cart-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: white; padding: 12px 16px; border-radius: 12px; margin-bottom: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-        }
-
-        /* Buttons & Inputs */
-        .btn { 
-            width: 100%; padding: 14px; border: none; border-radius: 12px; 
-            font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
+        :root { --primary: #4f46e5; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --dark: #0f172a; --bg: #f8fafc; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.2s; }
+        body { margin: 0; background: var(--bg); color: var(--dark); overflow-x: hidden; }
+        .nav-bar { background: var(--dark); display: none; justify-content: center; padding: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); flex-wrap: wrap; }
+        .nav-bar button { background: transparent; color: #94a3b8; border: none; padding: 12px 18px; margin: 4px; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 11px; text-transform: uppercase; }
+        .nav-bar button.active { background: var(--primary); color: white; }
+        .view { display: none; padding: 20px; max-width: 1000px; margin: auto; animation: slideUp 0.4s ease-out; }
+        .view.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #f1f5f9; }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .menu-item { border: 1px solid #e2e8f0; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; background: white; position: relative; }
+        .stock-tag { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 4px 8px; border-radius: 8px; font-weight: 800; }
+        .s-ok { background: #dcfce7; color: #15803d; }
+        .s-out { background: #fee2e2; color: #b91c1c; }
+        .batch-tag { font-size: 10px; padding: 3px 8px; border-radius: 6px; background: #f1f5f9; margin: 2px; display: inline-block; border: 1px solid #e2e8f0; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--success); color: white; }
         .btn-danger { background: var(--danger); color: white; }
-        
-        input { 
-            width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; 
-            margin: 10px 0; font-size: 15px; outline: none; 
-        }
-        input:focus { border-color: var(--primary); }
-
-        /* Table Laporan */
-        table { width: 100%; border-collapse: separate; border-spacing: 0; }
-        th { background: #f8fafc; padding: 15px; text-align: left; font-size: 12px; text-transform: uppercase; color: #64748b; }
-        td { padding: 15px; border-top: 1px solid #f1f5f9; }
-
-        @media (max-width: 600px) { .menu-grid { grid-template-columns: 1fr 1fr; } }
+        .owner-only { display: none; }
+        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #f1f5f9; border-radius: 12px; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        #print-area { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 20px; box-shadow: 0 0 100px rgba(0,0,0,0.5); z-index: 2000; width: 320px; border: 1px solid #ddd; }
+        @media print { body * { visibility: hidden; } #print-area, #print-area * { visibility: visible; } #print-area { display: block !important; position: absolute; left: 0; top: 0; transform: none; box-shadow: none; width: 100%; } }
     </style>
 </head>
 <body>
 
     <div id="view-home" class="view active">
-        <div style="max-width:400px; margin: 120px auto; text-align:center;" class="card">
-            <div style="font-size: 40px; margin-bottom: 10px;">🍽️</div>
-            <h2 style="margin:0; letter-spacing: -1px;">Welcome Back</h2>
-            <p style="color: #64748b; font-size: 14px; margin-bottom: 25px;">Enter your PIN to access the system</p>
-            <input type="password" id="pass-input" placeholder="••••" style="text-align:center; letter-spacing: 10px; font-size: 24px;">
-            <button class="btn btn-primary" onclick="handleLogin()">Unlock System</button>
+        <div style="max-width:380px; margin: 100px auto; text-align:center;" class="card">
+            <h1 style="color: var(--primary);">Cafe</h1>
+            <input type="password" id="pass-input" placeholder="••••" style="text-align:center; font-size: 32px; letter-spacing: 12px; background: #f8fafc;">
+            <button class="btn btn-primary" onclick="handleLogin()">MASUK</button>
         </div>
     </div>
 
     <div class="nav-bar" id="main-nav">
-        <button id="nav-waiter" onclick="switchView('waiter')">📦 ORDER</button>
-        <button id="nav-antar" onclick="switchView('antar')">🚚 ANTAR</button>
-        <button id="nav-dapur" onclick="switchView('dapur')">🍳 DAPUR</button>
-        <button id="nav-kasir" onclick="switchView('kasir')">💵 KASIR</button>
-        <button id="nav-stok" onclick="switchView('stok')">🏬 GUDANG</button>
-        <button id="nav-laporan" onclick="switchView('laporan')">📈 LAPORAN</button>
-        <button onclick="location.reload()" style="color: var(--danger); margin-left: auto;">LOGOUT</button>
+        <button id="nav-waiter" onclick="switchView('waiter')">📦 Order</button>
+        <button id="nav-dapur" onclick="switchView('dapur')">👨‍🍳 Dapur</button>
+        <button id="nav-antar" onclick="switchView('antar')">🚚 Antar</button>
+        <button id="nav-kasir" onclick="switchView('kasir')">💵 Kasir</button>
+        <button id="nav-stok" onclick="switchView('stok')">🏬 Gudang</button>
+        <button id="nav-laporan" onclick="switchView('laporan')">📊 Laporan</button>
+        <button onclick="location.reload()" style="color: var(--danger); margin-left: auto;">Keluar</button>
     </div>
 
     <div id="view-waiter" class="view">
         <div class="card">
-            <h3><span style="font-size:20px;">📝</span> New Order</h3>
-            <input type="number" id="meja-input" placeholder="Nomor Meja Pelanggan...">
+            <input type="number" id="meja-input" placeholder="No Meja" style="width:120px; text-align:center;">
             <div class="menu-grid" id="menu-container"></div>
         </div>
-        
         <div id="cart-box" style="display:none;" class="card">
-            <h3>🛒 Cart Meja <span id="display-meja"></span></h3>
-            <div id="cart-list"></div>
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <button class="btn" style="background:#e2e8f0; color:var(--dark);" onclick="cancelSemua()">Clear</button>
-                <button class="btn btn-primary" onclick="kirimPesanan()">Confirm Order</button>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0;">🛒 Keranjang Meja <span id="display-meja"></span></h3>
+                <button onclick="cancelSemua()" class="btn-danger" style="width:auto; padding:8px 15px; font-size:11px;">BATAL SEMUA</button>
             </div>
+            <div id="cart-list" style="margin-top:15px; border-top:1px dashed #eee;"></div>
+            <button class="btn btn-primary" style="margin-top:20px;" onclick="kirimPesanan()">KIRIM KE DAPUR</button>
         </div>
     </div>
 
-    <div id="view-dapur" class="view"><h3>🍳 Kitchen Queue</h3><div id="dapur-container"></div></div>
-    <div id="view-antar" class="view"><h3>🚚 Ready to Serve</h3><div id="antar-container" class="menu-grid"></div></div>
-    <div id="view-kasir" class="view"><h3>💵 Billing</h3><div id="kasir-container"></div></div>
+    <div id="view-dapur" class="view"><h3>🍳 Antrean Masak</h3><div id="dapur-container"></div></div>
+    <div id="view-antar" class="view"><h3>🚚 Siap Antar</h3><div id="antar-container"></div></div>
+    <div id="view-kasir" class="view"><h3>💵 Billing Kasir</h3><div id="kasir-container"></div></div>
 
     <div id="view-stok" class="view">
-        <div class="card owner-only"><h3>🏷️ Price & Master</h3><div id="price-control-area"></div></div>
+        <div class="card owner-only" style="background: #eef2ff; border: 2px solid var(--primary);">
+            <h3>⚙️ Menu Baru</h3>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="new-menu-name" placeholder="Nama Menu">
+                <input type="number" id="new-menu-price" placeholder="Harga">
+            </div>
+            <button class="btn btn-primary" onclick="tambahMasterMenu()">TAMBAHKAN MENU</button>
+        </div>
         <div class="card owner-only">
-            <h3>📥 Stock Entry</h3>
+            <h3>📦 Stok Masak (Batch FIFO)</h3>
             <select id="stok-item-select"></select>
-            <input type="number" id="stok-qty-input" placeholder="Add quantity...">
-            <button class="btn btn-primary" onclick="tambahStokBatch()">Add to Batch</button>
+            <input type="number" id="stok-qty-input" placeholder="Jumlah">
+            <button class="btn btn-success" onclick="tambahStokBatch()">TAMBAH STOK</button>
         </div>
         <div class="card">
-            <div style="display:flex; justify-content:space-between;"><h3>📦 Live Inventory</h3><button class="owner-only btn-danger" style="width:auto; padding:5px 15px;" onclick="resetGudang()">Reset</button></div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>📊 Inventori</h3>
+                <button class="btn-danger owner-only" style="width:auto; padding:5px 15px;" onclick="resetGudang()">RESET STOK</button>
+            </div>
             <div id="stok-list-area"></div>
         </div>
     </div>
 
     <div id="view-laporan" class="view">
-        <div class="card" style="background: var(--primary); color:white;">
-            <p style="margin:0; opacity:0.8;">Total Revenue</p>
-            <h1 id="lap-omzet" style="margin:5px 0 0 0; font-size:40px;">Rp 0</h1>
+        <div class="card" style="background:var(--primary); color:white; text-align:center;">
+            <h1 id="lap-omzet">Rp 0</h1>
         </div>
-        <div class="card"><h3>📊 Sales History</h3><table id="lap-body"></table></div>
+        <button class="btn btn-danger owner-only" onclick="resetLaporan()" style="margin-bottom:15px;">RESET LAPORAN</button>
+        <div id="lap-body"></div>
+    </div>
+
+    <div id="print-area">
+        <div id="struk-content"></div>
+        <div class="no-print" style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn btn-primary" onclick="window.print()">PRINT</button>
+            <button class="btn" style="background:#eee" onclick="tutupStruk()">TUTUP</button>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Firebase Config (Tetap sama agar koneksi tidak putus)
         const firebaseConfig = {
             apiKey: "AIzaSyD8-Ps6ompRiQ7ITKE9nYvOxzR77aL120U",
             authDomain: "kasir-abc5f.firebaseapp.com",
@@ -168,189 +129,166 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let MASTER_MENU = {};
-        let cart = [];
-        let stokFIFO = {};
+        let MASTER_MENU = {}; let cart = []; let stokFIFO = {}; let isOwner = false;
 
-        // --- AUTH ---
         function handleLogin() {
             const pin = document.getElementById('pass-input').value;
-            const btns = document.querySelectorAll('.nav-bar button');
-            btns.forEach(b => b.style.display = 'none');
-            btns[btns.length-1].style.display = 'block';
-            document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'none');
+            const navs = document.querySelectorAll('.nav-bar button');
+            navs.forEach(n => n.style.display = 'none');
+            isOwner = false;
 
             if(pin === "1111") { 
-                document.getElementById('nav-waiter').style.display = 'block';
-                document.getElementById('nav-antar').style.display = 'block';
-                switchView('waiter');
+                ['nav-waiter', 'nav-antar'].forEach(i => document.getElementById(i).style.display = 'block');
+                showApp('waiter');
+            } else if(pin === "2222") { 
+                document.getElementById('nav-dapur').style.display = 'block';
+                showApp('dapur');
+            } else if(pin === "3333") { 
+                ['nav-kasir', 'nav-stok'].forEach(i => document.getElementById(i).style.display = 'block');
+                showApp('kasir');
             } else if(pin === "4444") { 
-                btns.forEach(b => b.style.display = 'block');
-                document.querySelectorAll('.owner-only').forEach(el => el.style.display = 'block');
-                switchView('laporan');
-            } else { alert("Wrong PIN!"); return; }
-            document.getElementById('view-home').style.display = 'none';
-            document.getElementById('main-nav').style.display = 'flex';
+                isOwner = true;
+                navs.forEach(n => n.style.display = 'block');
+                document.querySelectorAll('.owner-only').forEach(e => e.style.display = 'block');
+                showApp('laporan');
+            } else { alert("PIN Salah!"); }
         }
 
+        function showApp(v) { document.getElementById('view-home').style.display = 'none'; document.getElementById('main-nav').style.display = 'flex'; switchView(v); }
+
         function switchView(v) {
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-bar button').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.nav-bar button').forEach(e => e.classList.remove('active'));
             document.getElementById('view-'+v).classList.add('active');
             if(document.getElementById('nav-'+v)) document.getElementById('nav-'+v).classList.add('active');
         }
 
-        // --- CORE DATA & REALTIME STOCK ---
-        db.ref('master_menu').on('value', snap => { MASTER_MENU = snap.val() || {}; renderMenu(); renderPriceControl(); renderMenuDropdown(); });
-        db.ref('stok_fifo').on('value', snap => { stokFIFO = snap.val() || {}; renderMenu(); renderStokGudang(); });
+        db.ref('master_menu').on('value', snap => { MASTER_MENU = snap.val() || {}; renderMenu(); renderDropdown(); renderStokList(); });
+        db.ref('stok_fifo').on('value', snap => { stokFIFO = snap.val() || {}; renderMenu(); renderStokList(); });
 
         function renderMenu() {
             let h = "";
             for(let id in MASTER_MENU) {
-                let total = 0; 
-                if(stokFIFO[id]) Object.values(stokFIFO[id]).forEach(b => total += b.qty);
-                
-                let stockClass = total > 10 ? 'stock-safe' : (total > 0 ? 'stock-low' : 'stock-empty');
-                let stockText = total > 0 ? `Stock: ${total}` : 'OUT OF STOCK';
-
-                h += `
-                <div class="menu-item" onclick="${total > 0 ? `addCart('${id}')` : 'alert(\'Stok Habis!\')'}">
-                    <span class="stock-indicator ${stockClass}">${stockText}</span>
-                    <div style="font-size:30px; margin-bottom:10px;">🍴</div>
-                    <div style="font-weight:700; font-size:14px; margin-bottom:5px;">${MASTER_MENU[id].n}</div>
-                    <div style="color:var(--primary); font-weight:700; font-size:13px;">Rp ${MASTER_MENU[id].h.toLocaleString()}</div>
+                let total = 0; if(stokFIFO[id]) Object.values(stokFIFO[id]).forEach(b => total += b.qty);
+                h += `<div class="menu-item" onclick="addCart('${id}')">
+                    <span class="stock-tag ${total > 0 ? 's-ok' : 's-out'}">${total}</span>
+                    <b>${MASTER_MENU[id].n}</b><br><small>Rp ${MASTER_MENU[id].h.toLocaleString()}</small>
                 </div>`;
             }
             document.getElementById('menu-container').innerHTML = h;
         }
 
-        // --- CART LOGIC (v4.6 UPGRADED) ---
-        function addCart(id) {
-            const existing = cart.find(item => item.id === id);
-            // Cek sisa stok di keranjang vs stok asli
-            let totalTersedia = 0;
-            if(stokFIFO[id]) Object.values(stokFIFO[id]).forEach(b => totalTersedia += b.qty);
-            
-            if (existing) {
-                if(existing.qty + 1 > totalTersedia) return alert("Batas stok tercapai!");
-                existing.qty += 1;
-            } else {
-                cart.push({ id, n: MASTER_MENU[id].n, h: MASTER_MENU[id].h, qty: 1 });
+        function tambahMasterMenu() {
+            const n = document.getElementById('new-menu-name').value;
+            const h = parseInt(document.getElementById('new-menu-price').value);
+            if(n && h) db.ref('master_menu').push({ n, h }).then(() => { 
+                document.getElementById('new-menu-name').value = ""; 
+                document.getElementById('new-menu-price').value = ""; 
+            });
+        }
+
+        function hapusMenu(id) {
+            if(confirm("Hapus " + MASTER_MENU[id].n + "?")) {
+                db.ref('master_menu/' + id).remove();
+                db.ref('stok_fifo/' + id).remove();
             }
+        }
+
+        function renderStokList() {
+            let h = "<table><tr><th>Menu</th><th>Batch</th><th>Aksi</th></tr>";
+            for(let id in MASTER_MENU) {
+                let t = 0; let bts = stokFIFO[id] ? Object.keys(stokFIFO[id]).map(k=>({k, ...stokFIFO[id][k]})).sort((a,b)=>a.ts-b.ts) : [];
+                bts.forEach(b => t += b.qty);
+                let bHTML = bts.map(b => `<span class="batch-tag">${b.qty}</span>`).join(" ");
+                h += `<tr><td><b>${MASTER_MENU[id].n}</b></td><td>${bHTML || '0'} (Total: ${t})</td>
+                    <td>${isOwner ? `<button class="btn-danger" style="padding:5px 10px; font-size:10px;" onclick="hapusMenu('${id}')">HAPUS</button>` : '-'}</td></tr>`;
+            }
+            document.getElementById('stok-list-area').innerHTML = h + "</table>";
+        }
+
+        function addCart(id) {
+            let total = 0; if(stokFIFO[id]) Object.values(stokFIFO[id]).forEach(b => total += b.qty);
+            const ex = cart.find(c => c.id === id);
+            if(ex) { if(ex.qty < total) ex.qty++; else alert("Stok Habis!"); }
+            else { if(total > 0) cart.push({id, n:MASTER_MENU[id].n, h:MASTER_MENU[id].h, qty:1}); else alert("Stok Habis!"); }
             renderCart();
         }
 
-        function renderCart() {
-            const box = document.getElementById('cart-box');
-            const list = document.getElementById('cart-list');
-            if(cart.length === 0) { box.style.display = 'none'; return; }
-            box.style.display = 'block';
-            document.getElementById('display-meja').innerText = document.getElementById('meja-input').value || "?";
-            list.innerHTML = cart.map(item => `
-                <div class="cart-item">
-                    <div><b>${item.n}</b> <span class="qty-badge" style="background:#eef2ff; color:var(--primary); padding:2px 8px; border-radius:6px; margin-left:10px;">x${item.qty}</span></div>
-                    <button onclick="batalSatu('${item.id}')" style="border:none; background:none; color:var(--danger); cursor:pointer; font-weight:bold;">✕</button>
-                </div>
-            `).join("");
-        }
-
         function batalSatu(id) {
-            const idx = cart.findIndex(item => item.id === id);
-            if (idx > -1) {
-                if (cart[idx].qty > 1) cart[idx].qty -= 1;
-                else cart.splice(idx, 1);
-            }
+            const idx = cart.findIndex(c => c.id === id);
+            if(idx !== -1) { if(cart[idx].qty > 1) cart[idx].qty--; else cart.splice(idx, 1); }
             renderCart();
         }
 
         function cancelSemua() { cart = []; renderCart(); }
 
-        // --- ACTION LOGIC ---
+        function renderCart() {
+            document.getElementById('cart-box').style.display = cart.length ? 'block' : 'none';
+            document.getElementById('display-meja').innerText = document.getElementById('meja-input').value || "?";
+            document.getElementById('cart-list').innerHTML = cart.map(i => `
+                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;">
+                    <span><b>${i.n}</b> x${i.qty} (@${i.h.toLocaleString()})</span>
+                    <button onclick="batalSatu('${i.id}')" style="background:none; border:none; color:var(--danger); font-weight:bold; cursor:pointer;">Batal</button>
+                </div>
+            `).join("");
+        }
+
         async function kirimPesanan() {
             const meja = document.getElementById('meja-input').value;
-            if(!meja) return alert("Pilih nomor meja!");
-            
+            if(!meja) return alert("Meja?");
             for(let item of cart) {
-                for(let i = 0; i < item.qty; i++) await potongStok(item.id);
+                let needed = item.qty;
+                const bts = Object.keys(stokFIFO[item.id] || {}).map(k=>({k, ...stokFIFO[item.id][k]})).sort((a,b)=>a.ts-b.ts);
+                for(let b of bts) {
+                    if(needed <= 0) break;
+                    if(b.qty <= needed) { needed -= b.qty; await db.ref(`stok_fifo/${item.id}/${b.k}`).remove(); }
+                    else { await db.ref(`stok_fifo/${item.id}/${b.k}`).update({qty: b.qty - needed}); needed = 0; }
+                }
             }
-
-            db.ref('orders').push({
-                meja, items: cart, total: cart.reduce((s,i) => s + (i.h * i.qty), 0),
-                ts: Date.now(), waktu: new Date().toLocaleTimeString(), status: "dimasak"
-            });
+            db.ref('orders').push({ meja, items: cart, status: 'masak', ts: Date.now(), total: cart.reduce((a,b)=>a+(b.h*b.qty), 0) });
             cart = []; document.getElementById('meja-input').value = ""; renderCart();
-            alert("Sent to Kitchen!");
         }
 
-        async function potongStok(id) {
-            const batches = Object.keys(stokFIFO[id]).map(k=>({k, ...stokFIFO[id][k]})).sort((a,b)=>a.ts-b.ts);
-            const oldest = batches[0];
-            if(oldest.qty > 1) await db.ref(`stok_fifo/${id}/${oldest.k}`).update({ qty: oldest.qty - 1 });
-            else await db.ref(`stok_fifo/${id}/${oldest.k}`).remove();
-        }
-
-        // --- DASHBOARD REALTIME ---
         db.ref('orders').on('value', snap => {
-            const data = snap.val();
-            let dH = "", aH = "", kH = "";
-            if(data) {
-                const arr = Object.keys(data).map(k=>({k, ...data[k]})).sort((a,b)=>a.ts-b.ts);
-                arr.forEach(o => {
-                    const html = `<div class="card" style="border-left:5px solid ${o.status==='dimasak'?'var(--warning)':'var(--success)'}">
-                        <div style="display:flex; justify-content:space-between;"><b>Meja ${o.meja}</b> <small>${o.waktu}</small></div>
-                        <p style="margin:10px 0;">${o.items.map(i => `${i.n} (x${i.qty})`).join(", ")}</p>
-                        ${o.status==='dimasak' ? `<button class="btn btn-primary" onclick="db.ref('orders/${o.k}/status').set('siap')">MARK AS READY</button>` : ''}
-                        ${o.status==='siap' ? `<button class="btn" style="background:var(--success); color:white" onclick="db.ref('orders/${o.k}/status').set('diantar')">DELIVERED</button>` : ''}
-                        ${o.status==='diantar' ? `<button class="btn btn-primary" onclick="bayar('${o.k}')">COLLECT Rp${o.total.toLocaleString()}</button>` : ''}
-                    </div>`;
-                    if(o.status==='dimasak') dH += html; else if(o.status==='siap') aH += html; else if(o.status==='diantar') kH += html;
-                });
-            }
+            let dH="", aH="", kH="";
+            snap.forEach(c => {
+                const o = c.val(); const items = o.items.map(i => `${i.n} x${i.qty}`).join(", ");
+                const card = `<div class="card"><b>Meja ${o.meja}</b><p>${items}</p>`;
+                if(o.status==='masak') dH += card + `<button class="btn btn-primary" onclick="db.ref('orders/${c.key}/status').set('antar')">SIAP</button></div>`;
+                else if(o.status==='antar') aH += card + `<button class="btn btn-success" onclick="db.ref('orders/${c.key}/status').set('kasir')">DIANTAR</button></div>`;
+                else if(o.status==='kasir') kH += card + `<button class="btn btn-primary" onclick="prosesBayar('${c.key}')">BAYAR</button></div>`;
+            });
             document.getElementById('dapur-container').innerHTML = dH;
             document.getElementById('antar-container').innerHTML = aH;
             document.getElementById('kasir-container').innerHTML = kH;
         });
 
-        // --- GUDANG & LAPORAN ---
-        function renderStokGudang() {
-            let h = "<table><thead><tr><th>Menu Name</th><th>Stock Batches</th></tr></thead><tbody>";
-            for(let id in MASTER_MENU) {
-                let batches = stokFIFO[id] ? Object.keys(stokFIFO[id]).map(k=>({k, ...stokFIFO[id][k]})).sort((a,b)=>a.ts-b.ts) : [];
-                let bHTML = batches.map(b => `<span class="qty-badge" style="background:#f1f5f9; padding:2px 8px; border-radius:6px; margin:2px; display:inline-block">${b.qty}</span>`).join("");
-                h += `<tr><td><b>${MASTER_MENU[id].n}</b></td><td>${bHTML || '<span style="color:var(--danger)">Out of stock</span>'}</td></tr>`;
-            }
-            document.getElementById('stok-list-area').innerHTML = h + "</tbody></table>";
+        function prosesBayar(key) {
+            db.ref('orders/'+key).once('value', snap => {
+                const o = snap.val();
+                const str = `<div style="text-align:center; font-family:monospace;"><h3>RESTO PRO</h3><p>Meja: ${o.meja}</p><hr>${o.items.map(i=>`<div>${i.n} x${i.qty} <span>Rp${(i.h*i.qty).toLocaleString()}</span></div>`).join('')}<hr><h3>TOTAL: Rp${o.total.toLocaleString()}</h3></div>`;
+                document.getElementById('struk-content').innerHTML = str;
+                document.getElementById('print-area').style.display = 'block';
+                db.ref('laporan').push({ ...o, tgl: new Date().toLocaleString() }).then(() => db.ref('orders/'+key).remove());
+            });
         }
 
-        function bayar(k) {
-            db.ref('orders/'+k).once('value', snap => {
-                db.ref('laporan').push(snap.val()).then(() => db.ref('orders/'+k).remove());
-            });
+        function tutupStruk() { document.getElementById('print-area').style.display = 'none'; }
+        function resetLaporan() { if(confirm("Hapus laporan?")) db.ref('laporan').remove(); }
+        function resetGudang() { if(confirm("Kosongkan stok?")) db.ref('stok_fifo').remove(); }
+        function renderDropdown() { let h = ""; for(let id in MASTER_MENU) h += `<option value="${id}">${MASTER_MENU[id].n}</option>`; document.getElementById('stok-item-select').innerHTML = h; }
+        function tambahStokBatch() {
+            const id = document.getElementById('stok-item-select').value;
+            const q = parseInt(document.getElementById('stok-qty-input').value);
+            if(q) db.ref('stok_fifo/'+id).push({ qty: q, ts: Date.now() });
         }
 
         db.ref('laporan').on('value', snap => {
-            let h = "<thead><tr><th>Time</th><th>Table</th><th>Amount</th></tr></thead><tbody>", t = 0; 
-            if(snap.val()) Object.values(snap.val()).reverse().forEach(l=>{
-                t+=l.total; h+=`<tr><td>${l.waktu}</td><td>Meja ${l.meja}</td><td><b>Rp ${l.total.toLocaleString()}</b></td></tr>`;
-            });
-            document.getElementById('lap-body').innerHTML = h + "</tbody>";
-            document.getElementById('lap-omzet').innerText = "Rp " + t.toLocaleString();
+            let t = 0; let h = "";
+            snap.forEach(c => { t += c.val().total; h += `<div style="padding:10px; border-bottom:1px solid #eee;">Meja ${c.val().meja} - <b>Rp ${c.val().total.toLocaleString()}</b></div>`; });
+            document.getElementById('lap-omzet').innerText = "Omzet: Rp " + t.toLocaleString();
+            document.getElementById('lap-body').innerHTML = h;
         });
-
-        function renderPriceControl() {
-            let h = "<table>";
-            for(let id in MASTER_MENU) h += `<tr><td>${MASTER_MENU[id].n}</td><td><button class="btn" style="padding:5px; background:#f1f5f9" onclick="editHarga('${id}')">Rp ${MASTER_MENU[id].h.toLocaleString()}</button></td></tr>`;
-            document.getElementById('price-control-area').innerHTML = h + "</table>";
-        }
-        function editHarga(id) { let p = prompt("New Price?"); if(p) db.ref(`master_menu/${id}/h`).set(parseInt(p)); }
-        function renderMenuDropdown() { let h = ""; for(let id in MASTER_MENU) h += `<option value="${id}">${MASTER_MENU[id].n}</option>`; document.getElementById('stok-item-select').innerHTML = h; }
-        function tambahStokBatch() {
-            const id = document.getElementById('stok-item-select').value;
-            const qty = parseInt(document.getElementById('stok-qty-input').value);
-            if(qty) db.ref('stok_fifo/'+id).push({ qty, ts: Date.now(), tgl: new Date().toLocaleDateString() });
-            document.getElementById('stok-qty-input').value = "";
-        }
-        function resetGudang() { if(confirm("Clear all inventory?")) db.ref('stok_fifo').remove(); }
     </script>
 </body>
 </html>
