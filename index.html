@@ -1,291 +1,1542 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RESTO PRO ULTIMATE - v7.3</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #4f46e5; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --dark: #0f172a; --bg: #f8fafc; }
-        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.2s; }
-        body { margin: 0; background: var(--bg); color: var(--dark); overflow-x: hidden; }
-        
-        .nav-bar { background: var(--dark); display: none; justify-content: center; padding: 10px; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); flex-wrap: wrap; align-items: center; }
-        .nav-bar button { background: transparent; color: #94a3b8; border: none; padding: 12px 15px; margin: 4px; cursor: pointer; border-radius: 10px; font-weight: 600; font-size: 11px; text-transform: uppercase; }
-        .nav-bar button.active { background: var(--primary); color: white; }
-        .btn-logout { color: #ff4444 !important; border: 1px solid #ff4444 !important; margin-left: auto !important; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAFE — POS System</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0a0a; --ink2: #1a1a1a; --ink3: #2a2a2a; --muted: #3d3d3d;
+  --border: #2e2e2e; --text: #e8e4dc; --text2: #a09890;
+  --accent: #e8c547; --accent2: #c9a227;
+  --green: #4ecb71; --red: #e85454; --orange: #e88a30; --blue: #5b9cf6;
+  --purple: #a78bfa;
+  --mono: 'Space Mono', monospace; --sans: 'DM Sans', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--ink); color: var(--text); font-family: var(--sans); min-height: 100vh; overflow-x: hidden; }
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
 
-        .view { display: none; padding: 20px; max-width: 1000px; margin: auto; animation: slideUp 0.4s ease-out; }
-        .view.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #f1f5f9; position: relative; }
-        .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
-        .menu-item { border: 1px solid #e2e8f0; padding: 20px; border-radius: 20px; text-align: center; cursor: pointer; background: white; position: relative; }
-        
-        .stock-tag { position: absolute; top: 10px; right: 10px; font-size: 10px; padding: 4px 8px; border-radius: 8px; font-weight: 800; }
-        .timer-badge { font-family: monospace; font-weight: bold; padding: 4px 10px; border-radius: 8px; font-size: 13px; }
-        .s-ok { background: #dcfce7; color: #15803d; }
-        .s-out { background: #fee2e2; color: #b91c1c; }
-        .batch-tag { font-size: 10px; padding: 3px 8px; border-radius: 6px; background: #f1f5f9; margin: 2px; display: inline-block; border: 1px solid #e2e8f0; }
+/* LOGIN */
+#screen-login { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; background: var(--ink); }
+.login-box { width: 320px; padding: 44px 36px; border: 1px solid var(--border); background: var(--ink2); position: relative; }
+.login-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
+.login-logo { font-family: var(--mono); font-size: 26px; font-weight: 700; letter-spacing: 6px; color: var(--accent); text-align: center; margin-bottom: 4px; }
+.login-sub { font-size: 10px; letter-spacing: 3px; color: var(--text2); text-align: center; text-transform: uppercase; margin-bottom: 36px; }
+.pin-dots { display: flex; gap: 10px; justify-content: center; margin-bottom: 28px; }
+.pin-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--border); background: transparent; transition: all 0.15s; }
+.pin-dot.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px rgba(232,197,71,0.4); }
+.pin-dot.error { background: var(--red); border-color: var(--red); animation: shake 0.3s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+.pin-key { background: var(--ink3); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 17px; padding: 17px; cursor: pointer; transition: all 0.1s; user-select: none; text-align: center; }
+.pin-key:hover { background: var(--muted); border-color: var(--text2); }
+.pin-key:active { transform: scale(0.93); background: rgba(232,197,71,0.15); border-color: var(--accent); }
+.pin-key.enter { background: var(--accent); color: var(--ink); font-weight: 700; }
+.pin-key.enter:hover { background: var(--accent2); }
+.login-info { text-align: center; font-size: 11px; color: var(--text2); font-family: var(--mono); margin-top: 16px; letter-spacing: 1px; }
+.login-error { text-align: center; color: var(--red); font-size: 12px; min-height: 18px; margin-top: 6px; font-family: var(--mono); letter-spacing: 1px; }
 
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger); color: white; }
-        
-        .owner-only { display: none; }
-        input, select { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #f1f5f9; border-radius: 12px; font-size: 14px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+/* TOPBAR */
+#topbar { display: none; position: sticky; top: 0; z-index: 100; background: var(--ink2); border-bottom: 1px solid var(--border); padding: 0 20px; height: 54px; align-items: center; gap: 2px; }
+#topbar.visible { display: flex; }
+.top-logo { font-family: var(--mono); color: var(--accent); font-size: 13px; letter-spacing: 4px; margin-right: 14px; flex-shrink: 0; }
+.nav-btn { background: transparent; border: none; color: var(--text2); padding: 7px 12px; cursor: pointer; font-family: var(--sans); font-size: 12px; font-weight: 500; border-radius: 6px; transition: all 0.15s; display: none; align-items: center; gap: 5px; white-space: nowrap; }
+.nav-btn.visible { display: flex; }
+.nav-btn:hover { color: var(--text); background: var(--ink3); }
+.nav-btn.active { color: var(--accent); background: rgba(232,197,71,0.1); }
+.top-spacer { flex: 1; }
+.logout-btn { background: transparent; border: 1px solid var(--border); color: var(--text2); padding: 6px 12px; cursor: pointer; font-size: 12px; font-family: var(--sans); border-radius: 6px; transition: all 0.15s; flex-shrink: 0; }
+.logout-btn:hover { border-color: var(--red); color: var(--red); }
+.role-badge { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; background: rgba(232,197,71,0.12); color: var(--accent); padding: 4px 8px; border-radius: 4px; text-transform: uppercase; flex-shrink: 0; }
+.mode-badge { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; flex-shrink: 0; }
+.mode-badge.fifo { background: rgba(91,156,246,0.12); color: var(--blue); border: 1px solid rgba(91,156,246,0.2); }
+.mode-badge.atomic { background: rgba(167,139,250,0.12); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
 
-        #print-area { display: none; }
-        @media print { 
-            body * { visibility: hidden; } 
-            #print-area, #print-area * { visibility: visible; } 
-            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; } 
-        }
-    </style>
+/* VIEWS */
+.view { display: none; padding: 22px 18px; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+.view.active { display: block; animation: fadeUp 0.28s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+/* HEADERS */
+.page-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+.page-title { font-family: var(--mono); font-size: 20px; color: var(--text); }
+.page-title span { color: var(--accent); }
+.page-count { font-family: var(--mono); font-size: 11px; color: var(--text2); background: var(--ink3); padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); }
+
+/* CARDS */
+.card { background: var(--ink2); border: 1px solid var(--border); padding: 22px; margin-bottom: 14px; position: relative; }
+.card-title { font-family: var(--mono); font-size: 10px; letter-spacing: 3px; color: var(--text2); text-transform: uppercase; margin-bottom: 16px; }
+
+/* WAITER */
+.waiter-layout { display: grid; grid-template-columns: 1fr 300px; gap: 18px; }
+@media(max-width: 720px) { .waiter-layout { grid-template-columns: 1fr; } }
+.table-selector { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding: 14px 16px; background: var(--ink3); border: 1px solid var(--border); }
+.table-label { font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--text2); text-transform: uppercase; white-space: nowrap; }
+.table-input { background: transparent; border: none; border-bottom: 2px solid var(--accent); color: var(--accent); font-family: var(--mono); font-size: 26px; font-weight: 700; width: 70px; text-align: center; outline: none; }
+.table-input::placeholder { color: var(--muted); }
+.menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.menu-item { background: var(--ink3); border: 1px solid var(--border); padding: 16px 12px; cursor: pointer; position: relative; transition: all 0.15s; text-align: center; overflow: hidden; }
+.menu-item:hover:not(.out-of-stock) { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+.menu-item:active:not(.out-of-stock) { transform: scale(0.96); }
+.menu-item.out-of-stock { opacity: 0.35; cursor: not-allowed; }
+.menu-item.adding { animation: addPulse 0.25s ease; }
+@keyframes addPulse { 50%{transform:scale(0.93);background:rgba(232,197,71,0.15)} }
+.stock-badge { position: absolute; top: 7px; right: 7px; font-family: var(--mono); font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 20px; }
+.badge-ok { background: rgba(78,203,113,0.18); color: var(--green); border: 1px solid rgba(78,203,113,0.25); }
+.badge-out { background: rgba(232,84,84,0.18); color: var(--red); border: 1px solid rgba(232,84,84,0.25); }
+.badge-low { background: rgba(232,138,48,0.18); color: var(--orange); border: 1px solid rgba(232,138,48,0.25); }
+.menu-name { font-weight: 600; font-size: 13px; margin: 8px 0 5px; }
+.menu-price { font-family: var(--mono); font-size: 11px; color: var(--accent); }
+
+/* CART */
+.cart-panel { background: var(--ink2); border: 1px solid var(--border); position: sticky; top: 66px; height: fit-content; }
+.cart-header { padding: 16px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.cart-title { font-family: var(--mono); font-size: 12px; color: var(--text); }
+.cart-meja { color: var(--accent); }
+.cart-clear { background: none; border: 1px solid var(--border); color: var(--text2); padding: 4px 9px; cursor: pointer; font-size: 10px; font-family: var(--mono); transition: all 0.15s; }
+.cart-clear:hover { border-color: var(--red); color: var(--red); }
+.cart-items { padding: 14px 18px; max-height: 300px; overflow-y: auto; }
+.cart-item { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--ink3); }
+.cart-item:last-child { border-bottom: none; }
+.cart-item-name { flex: 1; font-size: 12px; font-weight: 500; }
+.qty-ctrl { display: flex; align-items: center; gap: 5px; }
+.qty-btn { background: var(--ink3); border: 1px solid var(--border); color: var(--text); width: 24px; height: 24px; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.1s; }
+.qty-btn:hover { background: var(--muted); }
+.qty-btn.minus:hover { background: rgba(232,84,84,0.15); border-color: var(--red); color: var(--red); }
+.qty-num { font-family: var(--mono); font-size: 13px; font-weight: 700; width: 22px; text-align: center; }
+.cart-empty { padding: 36px 18px; text-align: center; color: var(--text2); font-size: 12px; }
+.cart-footer { padding: 14px 18px; border-top: 1px solid var(--border); }
+.cart-total { display: flex; justify-content: space-between; margin-bottom: 12px; }
+.cart-total-label { font-family: var(--mono); font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 2px; }
+.cart-total-val { font-family: var(--mono); font-size: 18px; font-weight: 700; color: var(--accent); }
+.send-btn { width: 100%; padding: 13px; background: var(--accent); color: var(--ink); border: none; cursor: pointer; font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; transition: all 0.15s; }
+.send-btn:hover { background: var(--accent2); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.send-btn.loading { animation: pulse 0.6s infinite; }
+@keyframes pulse { 50%{opacity:0.6} }
+
+/* ORDERS */
+.orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+.order-card { background: var(--ink2); border: 1px solid var(--border); padding: 18px; position: relative; }
+.order-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
+.order-card.masak::before { background: var(--orange); }
+.order-card.antar::before { background: var(--blue); }
+.order-card.kasir::before { background: var(--green); }
+.order-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.order-table { font-family: var(--mono); font-size: 19px; font-weight: 700; }
+.order-table small { font-size: 10px; color: var(--text2); display: block; letter-spacing: 2px; }
+.timer { font-family: var(--mono); font-size: 12px; font-weight: 700; padding: 4px 9px; border-radius: 4px; }
+.timer.normal { background: rgba(78,203,113,0.12); color: var(--green); }
+.timer.warn { background: rgba(232,138,48,0.12); color: var(--orange); }
+.timer.late { background: rgba(232,84,84,0.12); color: var(--red); animation: blink 1s infinite; }
+@keyframes blink { 50%{opacity:0.4} }
+.order-items { margin: 10px 0; padding: 10px 0; border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border); }
+.order-item-row { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; }
+.order-item-qty { font-family: var(--mono); color: var(--accent); }
+.action-btn { width: 100%; padding: 11px; border: none; cursor: pointer; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-top: 12px; transition: all 0.15s; }
+.action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.action-btn.masak-btn { background: var(--orange); color: white; }
+.action-btn.antar-btn { background: var(--blue); color: white; }
+
+/* KASIR */
+.cash-section { margin-top: 12px; background: var(--ink3); padding: 12px; border: 1px solid var(--border); }
+.total-row { display: flex; justify-content: space-between; margin-bottom: 9px; }
+.total-label { font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 1px; }
+.total-amount { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--accent); }
+.cash-input-wrap { position: relative; }
+.cash-input-wrap span { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-family: var(--mono); color: var(--text2); font-size: 12px; pointer-events: none; }
+.cash-input { width: 100%; padding: 10px 11px 10px 38px; background: var(--ink2); border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 14px; outline: none; transition: border-color 0.15s; margin-bottom: 8px; }
+.cash-input:focus { border-color: var(--accent); }
+.change-display { display: flex; justify-content: space-between; padding: 8px 0; }
+.change-val { font-family: var(--mono); font-size: 14px; font-weight: 700; }
+.change-val.ok { color: var(--green); }
+.change-val.err { color: var(--red); }
+.pay-btn { width: 100%; padding: 11px; background: var(--green); color: var(--ink); border: none; cursor: pointer; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-top: 6px; transition: all 0.15s; }
+.pay-btn:hover { filter: brightness(1.1); }
+.pay-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* STOK */
+.stok-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width: 600px) { .stok-layout { grid-template-columns: 1fr; } }
+.form-group { margin-bottom: 12px; }
+.form-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: var(--text2); text-transform: uppercase; margin-bottom: 5px; display: block; }
+.form-input, .form-select { width: 100%; padding: 10px 12px; background: var(--ink3); border: 1px solid var(--border); color: var(--text); font-family: var(--sans); font-size: 13px; outline: none; transition: border-color 0.15s; }
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+.form-select option { background: var(--ink2); }
+.stok-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.act-btn { padding: 11px; border: none; cursor: pointer; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s; }
+.act-btn.add { background: var(--green); color: var(--ink); }
+.act-btn.sub { background: rgba(232,84,84,0.15); color: var(--red); border: 1px solid rgba(232,84,84,0.25); }
+.act-btn:hover { filter: brightness(1.1); }
+.stok-table { width: 100%; border-collapse: collapse; }
+.stok-table th { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: var(--text2); text-transform: uppercase; padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.stok-table td { padding: 11px 12px; border-bottom: 1px solid var(--ink3); font-size: 12px; vertical-align: middle; }
+.stok-table tr:last-child td { border-bottom: none; }
+.stok-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.stok-bar { height: 3px; background: var(--ink3); border-radius: 2px; flex: 1; overflow: hidden; }
+.stok-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+.mini-btn { background: none; border: 1px solid var(--border); color: var(--text2); padding: 3px 7px; cursor: pointer; font-size: 9px; font-family: var(--mono); transition: all 0.15s; }
+.mini-btn:hover { border-color: var(--red); color: var(--red); }
+.owner-section { display: none; }
+
+/* ===== CHAT ===== */
+#chat-bubble {
+  position: fixed; bottom: 24px; right: 24px; z-index: 500;
+  display: none;
+}
+#chat-bubble.visible { display: block; }
+.chat-fab {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--accent); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 20px rgba(232,197,71,0.4);
+  transition: all 0.2s; position: relative;
+}
+.chat-fab:hover { transform: scale(1.1); background: var(--accent2); }
+.chat-unread {
+  position: absolute; top: -4px; right: -4px;
+  background: var(--red); color: white; border-radius: 50%;
+  width: 18px; height: 18px; font-size: 10px; font-family: var(--mono);
+  font-weight: 700; display: none; align-items: center; justify-content: center;
+}
+.chat-unread.show { display: flex; }
+
+#chat-window {
+  position: fixed; bottom: 86px; right: 24px; z-index: 500;
+  width: 340px; background: var(--ink2); border: 1px solid var(--border);
+  display: none; flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  max-height: 500px;
+}
+#chat-window.open { display: flex; animation: fadeUp 0.2s ease; }
+.chat-win-header {
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--ink3); flex-shrink: 0;
+}
+.chat-win-title { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 2px; }
+.chat-win-sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
+.chat-close { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px; }
+.chat-close:hover { color: var(--text); }
+
+.chat-channel-tabs {
+  display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0;
+  overflow-x: auto;
+}
+.chat-tab {
+  flex: 1; padding: 8px 10px; background: none; border: none;
+  color: var(--text2); font-family: var(--mono); font-size: 9px;
+  letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap; border-bottom: 2px solid transparent;
+  position: relative;
+}
+.chat-tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.chat-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-dot {
+  position: absolute; top: 6px; right: 6px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--red); display: none;
+}
+.tab-dot.show { display: block; }
+
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 12px;
+  display: flex; flex-direction: column; gap: 8px;
+  min-height: 200px;
+}
+.chat-msg {
+  max-width: 85%; padding: 8px 11px; position: relative;
+}
+.chat-msg.mine {
+  align-self: flex-end;
+  background: rgba(232,197,71,0.12); border: 1px solid rgba(232,197,71,0.2);
+  border-radius: 12px 12px 2px 12px;
+}
+.chat-msg.theirs {
+  align-self: flex-start;
+  background: var(--ink3); border: 1px solid var(--border);
+  border-radius: 12px 12px 12px 2px;
+}
+.chat-msg.system-msg {
+  align-self: center; background: none; border: none; padding: 2px 0;
+}
+.msg-sender { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 3px; }
+.msg-sender.mine-label { color: var(--accent); text-align: right; }
+.msg-sender.theirs-label { color: var(--text2); }
+.msg-text { font-size: 13px; line-height: 1.4; word-break: break-word; }
+.msg-time { font-family: var(--mono); font-size: 9px; color: var(--text2); margin-top: 3px; text-align: right; }
+.system-text { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 1px; }
+
+.chat-input-wrap {
+  display: flex; gap: 8px; padding: 10px 12px;
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.chat-input {
+  flex: 1; background: var(--ink3); border: 1px solid var(--border);
+  color: var(--text); padding: 9px 12px; font-family: var(--sans); font-size: 13px;
+  outline: none; transition: border-color 0.15s; resize: none; max-height: 80px;
+}
+.chat-input:focus { border-color: var(--accent); }
+.chat-send-btn {
+  background: var(--accent); color: var(--ink); border: none; padding: 9px 14px;
+  cursor: pointer; font-family: var(--mono); font-size: 12px; font-weight: 700;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.chat-send-btn:hover { background: var(--accent2); }
+.chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===== DEVELOPER PANEL ===== */
+.dev-section-title {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 3px; color: var(--purple);
+  text-transform: uppercase; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.dev-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(167,139,250,0.2); }
+.dev-pin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.dev-pin-card {
+  background: var(--ink3); border: 1px solid rgba(167,139,250,0.15);
+  padding: 14px; display: flex; flex-direction: column; gap: 8px;
+}
+.dev-pin-role { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: var(--purple); text-transform: uppercase; }
+.dev-pin-icon { font-size: 20px; }
+.dev-pin-code { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: 4px; min-height: 28px; }
+.dev-pin-code.empty { color: var(--border); font-size: 13px; letter-spacing: 1px; }
+.dev-pin-status { font-size: 10px; font-family: var(--mono); }
+.dev-pin-status.active { color: var(--green); }
+.dev-pin-status.none { color: var(--muted); }
+.dev-gen-btn {
+  background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.25); color: var(--purple);
+  padding: 7px; cursor: pointer; font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s; width: 100%;
+}
+.dev-gen-btn:hover { background: rgba(167,139,250,0.2); }
+.dev-revoke-btn {
+  background: rgba(232,84,84,0.08); border: 1px solid rgba(232,84,84,0.2); color: var(--red);
+  padding: 5px; cursor: pointer; font-family: var(--mono); font-size: 8px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s; width: 100%;
+}
+.dev-revoke-btn:hover { background: rgba(232,84,84,0.15); }
+.dev-gen-all-btn {
+  background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3); color: var(--purple);
+  padding: 11px 20px; cursor: pointer; font-family: var(--mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; transition: all 0.15s;
+}
+.dev-gen-all-btn:hover { background: rgba(167,139,250,0.25); }
+.dev-danger-btn {
+  background: rgba(232,84,84,0.08); border: 1px solid rgba(232,84,84,0.25); color: var(--red);
+  padding: 11px 20px; cursor: pointer; font-family: var(--mono); font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; transition: all 0.15s;
+}
+.dev-danger-btn:hover { background: rgba(232,84,84,0.18); }
+.dev-card { background: var(--ink2); border: 1px solid rgba(167,139,250,0.15); padding: 20px; margin-bottom: 14px; }
+
+/* FIFO BATCH DETAIL */
+.stok-item-block { background: var(--ink2); border: 1px solid var(--border); margin-bottom: 10px; overflow: hidden; }
+.stok-item-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px; cursor: pointer; transition: background 0.15s;
+  user-select: none;
+}
+.stok-item-header:hover { background: var(--ink3); }
+.stok-item-left { display: flex; align-items: center; gap: 12px; }
+.stok-item-name { font-weight: 600; font-size: 13px; }
+.stok-total-badge {
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 20px;
+}
+.stok-item-right { display: flex; align-items: center; gap: 10px; }
+.stok-bar-inline { display: flex; align-items: center; gap: 6px; }
+.stok-bar-sm { width: 80px; height: 3px; background: var(--ink3); border-radius: 2px; overflow: hidden; }
+.stok-bar-sm-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+.expand-icon { font-family: var(--mono); font-size: 10px; color: var(--text2); transition: transform 0.2s; }
+.expand-icon.open { transform: rotate(180deg); }
+
+.batch-detail { display: none; border-top: 1px solid var(--border); }
+.batch-detail.open { display: block; animation: fadeUp 0.2s ease; }
+.batch-header-row {
+  display: grid; grid-template-columns: 32px 1fr 80px 90px 80px;
+  padding: 7px 16px; background: var(--ink3);
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+  color: var(--text2); text-transform: uppercase; gap: 8px;
+}
+.batch-row {
+  display: grid; grid-template-columns: 32px 1fr 80px 90px 80px;
+  padding: 10px 16px; border-top: 1px solid var(--ink3);
+  align-items: center; gap: 8px; transition: background 0.1s;
+}
+.batch-row:hover { background: rgba(255,255,255,0.02); }
+.batch-row.next-out { background: rgba(232,197,71,0.04); border-left: 2px solid var(--accent); padding-left: 14px; }
+.batch-num {
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  color: var(--text2); text-align: center;
+  background: var(--ink3); border-radius: 4px; padding: 2px 5px;
+  display: inline-block;
+}
+.batch-num.first { background: rgba(232,197,71,0.15); color: var(--accent); }
+.batch-date { font-size: 12px; color: var(--text); }
+.batch-date small { font-size: 10px; color: var(--text2); display: block; margin-top: 1px; }
+.batch-qty-val { font-family: var(--mono); font-size: 14px; font-weight: 700; color: var(--text); }
+.batch-age {
+  font-family: var(--mono); font-size: 10px; padding: 3px 7px; border-radius: 4px;
+}
+.batch-age.fresh { background: rgba(78,203,113,0.12); color: var(--green); }
+.batch-age.mid   { background: rgba(232,138,48,0.12); color: var(--orange); }
+.batch-age.old   { background: rgba(232,84,84,0.12); color: var(--red); }
+.batch-actions { display: flex; gap: 5px; justify-content: flex-end; }
+.batch-del-btn {
+  background: none; border: 1px solid var(--border); color: var(--text2);
+  padding: 4px 8px; cursor: pointer; font-size: 9px; font-family: var(--mono);
+  transition: all 0.15s; white-space: nowrap;
+}
+.batch-del-btn:hover { border-color: var(--red); color: var(--red); }
+.stok-item-footer {
+  padding: 10px 16px; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--ink3);
+}
+.fifo-info { font-size: 11px; color: var(--text2); font-family: var(--mono); }
+.fifo-info span { color: var(--accent); }
+
+/* OWNER PANEL */
+.pin-mgmt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 14px; }
+.pin-role-card { background: var(--ink3); border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.pin-role-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: var(--text2); text-transform: uppercase; }
+.pin-role-icon { font-size: 22px; }
+.pin-code-display { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: 5px; min-height: 32px; display: flex; align-items: center; }
+.pin-code-display.none { color: var(--border); font-size: 13px; letter-spacing: 1px; }
+.pin-status { font-size: 10px; font-family: var(--mono); }
+.pin-status.active { color: var(--green); }
+.pin-status.none { color: var(--muted); }
+.gen-pin-btn { background: rgba(232,197,71,0.1); border: 1px solid rgba(232,197,71,0.25); color: var(--accent); padding: 8px; cursor: pointer; font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s; margin-top: 4px; width: 100%; }
+.gen-pin-btn:hover { background: rgba(232,197,71,0.2); }
+.revoke-pin-btn { background: rgba(232,84,84,0.08); border: 1px solid rgba(232,84,84,0.2); color: var(--red); padding: 5px; cursor: pointer; font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s; width: 100%; }
+.revoke-pin-btn:hover { background: rgba(232,84,84,0.15); }
+
+/* MODE TOGGLE */
+.mode-toggle-wrap { display: flex; border: 1px solid var(--border); overflow: hidden; margin-bottom: 0; }
+.mode-toggle-btn { flex: 1; padding: 11px; border: none; cursor: pointer; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s; background: var(--ink3); color: var(--text2); }
+.mode-toggle-btn.active-fifo { background: rgba(91,156,246,0.2); color: var(--blue); }
+.mode-toggle-btn.active-atomic { background: rgba(167,139,250,0.2); color: var(--purple); }
+.mode-desc { font-size: 11px; color: var(--text2); margin-top: 10px; line-height: 1.6; padding: 12px; background: var(--ink3); border: 1px solid var(--border); }
+
+/* LAPORAN */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.stat-box { background: var(--ink2); border: 1px solid var(--border); padding: 18px; }
+.stat-label { font-family: var(--mono); font-size: 9px; letter-spacing: 2px; color: var(--text2); text-transform: uppercase; margin-bottom: 7px; }
+.stat-val { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--accent); }
+.stat-val.green { color: var(--green); }
+.laporan-item { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--ink3); transition: background 0.1s; }
+.laporan-item:hover { background: var(--ink3); }
+.lap-meja { font-weight: 600; font-size: 13px; }
+.lap-time { font-size: 10px; color: var(--text2); margin-top: 2px; }
+.lap-total { font-family: var(--mono); font-size: 14px; font-weight: 700; }
+.reset-btn { background: rgba(232,84,84,0.08); border: 1px solid rgba(232,84,84,0.25); color: var(--red); padding: 8px 16px; cursor: pointer; font-family: var(--mono); font-size: 10px; letter-spacing: 1px; transition: all 0.15s; }
+.reset-btn:hover { background: rgba(232,84,84,0.18); }
+
+/* TOAST */
+#toast-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+.toast { background: var(--ink2); border: 1px solid var(--border); padding: 10px 16px; font-size: 12px; font-family: var(--mono); animation: toastIn 0.22s ease, toastOut 0.22s ease 2.6s forwards; display: flex; align-items: center; gap: 9px; min-width: 200px; max-width: 300px; }
+.toast.success { border-left: 3px solid var(--green); }
+.toast.error { border-left: 3px solid var(--red); }
+.toast.info { border-left: 3px solid var(--accent); }
+@keyframes toastIn { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
+@keyframes toastOut { to{opacity:0;transform:translateX(16px)} }
+
+/* MISC */
+.empty-state { text-align: center; padding: 50px 20px; color: var(--text2); }
+.empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+.empty-text { font-family: var(--mono); font-size: 12px; letter-spacing: 1px; }
+#print-area { display: none; }
+@media print { body * { visibility: hidden; } #print-area, #print-area * { visibility: visible; } #print-area { display: block !important; position: fixed; left: 0; top: 0; width: 100%; } }
+::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: var(--ink2); } ::-webkit-scrollbar-thumb { background: var(--muted); }
+</style>
 </head>
 <body>
 
-    <div id="view-home" class="view active">
-        <div style="max-width:380px; margin: 100px auto; text-align:center;" class="card">
-            <h1 style="color: var(--primary);">CAFE</h1>
-            <input type="password" id="pass-input" placeholder="••••" style="text-align:center; font-size: 32px; letter-spacing: 12px; background: #f8fafc;">
-            <button class="btn btn-primary" onclick="handleLogin()">MASUK</button>
-        </div>
+<!-- LOGIN -->
+<div id="screen-login">
+  <div class="login-box">
+    <div class="login-logo">KAFE</div>
+    <div class="login-sub">Point of Sale System</div>
+    <div class="pin-dots" id="pin-dots">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
     </div>
-
-    <div class="nav-bar" id="main-nav">
-        <button id="nav-waiter" onclick="switchView('waiter')">📦 Order</button>
-        <button id="nav-dapur" onclick="switchView('dapur')">👨‍🍳 Dapur</button>
-        <button id="nav-antar" onclick="switchView('antar')">🚚 Antar</button>
-        <button id="nav-kasir" onclick="switchView('kasir')">💵 Kasir</button>
-        <button id="nav-stok" onclick="switchView('stok')">🏬 Gudang</button>
-        <button id="nav-laporan" onclick="switchView('laporan')">📊 Laporan</button>
-        <button onclick="signOut()" class="btn-logout">🚪 KELUAR</button>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="addPin('1')">1</button>
+      <button class="pin-key" onclick="addPin('2')">2</button>
+      <button class="pin-key" onclick="addPin('3')">3</button>
+      <button class="pin-key" onclick="addPin('4')">4</button>
+      <button class="pin-key" onclick="addPin('5')">5</button>
+      <button class="pin-key" onclick="addPin('6')">6</button>
+      <button class="pin-key" onclick="addPin('7')">7</button>
+      <button class="pin-key" onclick="addPin('8')">8</button>
+      <button class="pin-key" onclick="addPin('9')">9</button>
+      <button class="pin-key" onclick="clearPin()">⌫</button>
+      <button class="pin-key" onclick="addPin('0')">0</button>
+      <button class="pin-key enter" onclick="doLogin()">→</button>
     </div>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-info">Masukkan PIN dari owner</div>
+  </div>
+</div>
 
-    <div id="view-waiter" class="view">
-        <div class="card"><input type="number" id="meja-input" placeholder="No Meja" style="width:120px; text-align:center;"><div class="menu-grid" id="menu-container"></div></div>
-        <div id="cart-box" style="display:none;" class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center;"><h3>🛒 Meja <span id="display-meja"></span></h3><button onclick="cancelSemua()" class="btn-danger" style="width:auto; padding:8px 15px; font-size:11px;">BATAL SEMUA</button></div>
-            <div id="cart-list" style="margin-top:15px; border-top:1px dashed #eee;"></div>
-            <button class="btn btn-primary" style="margin-top:20px;" onclick="kirimPesanan()">KIRIM KE DAPUR</button>
-        </div>
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="top-logo">KAFE</div>
+  <button class="nav-btn" id="nav-waiter"  onclick="switchView('waiter')">📦 Order</button>
+  <button class="nav-btn" id="nav-dapur"   onclick="switchView('dapur')">👨‍🍳 Dapur</button>
+  <button class="nav-btn" id="nav-antar"   onclick="switchView('antar')">🚚 Antar</button>
+  <button class="nav-btn" id="nav-kasir"   onclick="switchView('kasir')">💵 Kasir</button>
+  <button class="nav-btn" id="nav-stok"    onclick="switchView('stok')">🏬 Gudang</button>
+  <button class="nav-btn" id="nav-laporan" onclick="switchView('laporan')">📊 Laporan</button>
+  <button class="nav-btn" id="nav-owner"   onclick="switchView('owner')">⚙️ Owner</button>
+  <button class="nav-btn" id="nav-dev"     onclick="switchView('dev')">🛠️ Dev</button>
+  <div class="top-spacer"></div>
+  <div class="mode-badge fifo" id="global-mode-badge">FIFO</div>
+  <div class="role-badge" id="role-badge">—</div>
+  <button class="logout-btn" onclick="signOut()">Keluar</button>
+</div>
+
+<!-- WAITER -->
+<div id="view-waiter" class="view">
+  <div class="waiter-layout">
+    <div>
+      <div class="table-selector">
+        <div class="table-label">No. Meja</div>
+        <input class="table-input" id="meja-input" type="number" placeholder="—" min="1">
+      </div>
+      <div class="menu-grid" id="menu-container">
+        <div class="empty-state"><div class="empty-icon">🍽</div><div class="empty-text">Memuat menu...</div></div>
+      </div>
     </div>
-
-    <div id="view-dapur" class="view"><h3>🍳 Prioritas Masak</h3><div id="dapur-container"></div></div>
-    <div id="view-antar" class="view"><h3>🚚 Siap Antar</h3><div id="antar-container"></div></div>
-    <div id="view-kasir" class="view"><h3>💵 Kasir (Input Bayar)</h3><div id="kasir-container"></div></div>
-
-    <div id="view-stok" class="view">
-        <div class="card owner-only">
-            <h3>⚙️ Tambah Menu Baru</h3>
-            <div style="display: flex; gap: 10px;"><input type="text" id="new-menu-name" placeholder="Nama Menu"><input type="number" id="new-menu-price" placeholder="Harga"></div>
-            <button class="btn btn-primary" onclick="tambahMasterMenu()">DAFTARKAN MENU</button>
+    <div>
+      <div class="cart-panel">
+        <div class="cart-header">
+          <div class="cart-title">Keranjang <span class="cart-meja" id="cart-meja-display">#—</span></div>
+          <button class="cart-clear" onclick="cancelSemua()">BATAL SEMUA</button>
         </div>
-        <div class="card">
-            <h3>📦 Kelola Stok (Tambah/Hapus Sekaligus)</h3>
-            <select id="stok-item-select"></select>
-            <input type="number" id="stok-qty-input" placeholder="Jumlah Angka">
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button class="btn btn-success" onclick="tambahStokBatch()">SIMPAN STOK (+)</button>
-                <button class="btn btn-danger" onclick="kurangiStokManual()">HAPUS STOK (-)</button>
-            </div>
+        <div id="cart-items-wrap"><div class="cart-empty">Pilih menu untuk memesan</div></div>
+        <div class="cart-footer" id="cart-footer" style="display:none;">
+          <div class="cart-total">
+            <div class="cart-total-label">Total</div>
+            <div class="cart-total-val" id="cart-total-display">Rp 0</div>
+          </div>
+          <button class="send-btn" id="send-btn" onclick="kirimPesanan()">KIRIM KE DAPUR →</button>
         </div>
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:center;"><h3>📊 Inventori</h3><button class="btn-danger owner-only" style="width:auto; padding:5px 15px;" onclick="resetGudang()">RESET STOK</button></div>
-            <div id="stok-list-area"></div>
-        </div>
+      </div>
     </div>
+  </div>
+</div>
 
-    <div id="view-laporan" class="view">
-        <div class="card" style="background:var(--primary); color:white; text-align:center;"><h1 id="lap-omzet">Rp 0</h1></div>
-        <button class="btn btn-danger owner-only" onclick="resetLaporan()" style="margin-bottom:15px;">RESET LAPORAN</button>
-        <div id="lap-body"></div>
+<!-- DAPUR -->
+<div id="view-dapur" class="view">
+  <div class="page-header">
+    <div class="page-title">🍳 <span>Dapur</span></div>
+    <div class="page-count" id="dapur-count">0 pesanan</div>
+  </div>
+  <div class="orders-grid" id="dapur-container"></div>
+</div>
+
+<!-- ANTAR -->
+<div id="view-antar" class="view">
+  <div class="page-header">
+    <div class="page-title">🚚 <span>Siap Antar</span></div>
+    <div class="page-count" id="antar-count">0 pesanan</div>
+  </div>
+  <div class="orders-grid" id="antar-container"></div>
+</div>
+
+<!-- KASIR -->
+<div id="view-kasir" class="view">
+  <div class="page-header">
+    <div class="page-title">💵 <span>Kasir</span></div>
+    <div class="page-count" id="kasir-count">0 pesanan</div>
+  </div>
+  <div class="orders-grid" id="kasir-container"></div>
+</div>
+
+<!-- STOK -->
+<div id="view-stok" class="view">
+  <div class="stok-layout">
+    <div>
+      <div class="card owner-section">
+        <div class="card-title">Tambah Menu Baru</div>
+        <div class="form-group"><label class="form-label">Nama Menu</label><input class="form-input" id="new-menu-name" type="text" placeholder="Kopi Susu"></div>
+        <div class="form-group"><label class="form-label">Harga (Rp)</label><input class="form-input" id="new-menu-price" type="number" placeholder="25000"></div>
+        <button class="act-btn add" style="width:100%;" onclick="tambahMasterMenu()">+ DAFTARKAN MENU</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Tambah Stok Batch</div>
+        <div class="form-group"><label class="form-label">Pilih Menu</label><select class="form-select" id="stok-item-select"></select></div>
+        <div class="form-group"><label class="form-label">Jumlah Unit</label><input class="form-input" id="stok-qty-input" type="number" placeholder="10" min="1"></div>
+        <div style="background:var(--ink3);border:1px solid var(--border);padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--text2);line-height:1.6;">
+          &#128203; Setiap klik <b style="color:var(--accent)">Tambah Batch</b> mencatat 1 batch baru dengan timestamp sekarang. Batch paling lama dikurangi duluan (FIFO).
+        </div>
+        <div class="stok-actions">
+          <button class="act-btn add" onclick="tambahStokBatch()">+ TAMBAH BATCH</button>
+          <button class="act-btn sub" onclick="kurangiStokManual()">&#8722; KURANGI</button>
+        </div>
+      </div>
     </div>
+    <div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);">
+          <div>
+            <div class="card-title" style="margin:0 0 3px;">Inventori FIFO</div>
+            <div style="font-size:11px;color:var(--text2);">Klik menu untuk lihat detail batch</div>
+          </div>
+          <button class="reset-btn owner-section" onclick="resetGudang()">RESET STOK</button>
+        </div>
+        <div id="stok-list-area" style="padding:10px;"><div class="empty-state"><div class="empty-text">Memuat...</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <div id="print-area"></div>
+<!-- LAPORAN -->
+<div id="view-laporan" class="view">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+    <div class="page-title">📊 <span>Laporan</span></div>
+    <button class="reset-btn owner-section" onclick="resetLaporan()">RESET LAPORAN</button>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-box"><div class="stat-label">Total Omzet</div><div class="stat-val" id="lap-omzet">Rp 0</div></div>
+    <div class="stat-box"><div class="stat-label">Transaksi</div><div class="stat-val green" id="lap-count">0</div></div>
+    <div class="stat-box"><div class="stat-label">Rata-rata</div><div class="stat-val" id="lap-avg">Rp 0</div></div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden;"><div id="lap-body"></div></div>
+</div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<!-- OWNER PANEL -->
+<div id="view-owner" class="view">
+  <div class="page-header">
+    <div class="page-title">⚙️ <span>Panel Owner</span></div>
+  </div>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyD8-Ps6ompRiQ7ITKE9nYvOxzR77aL120U",
-            authDomain: "kasir-abc5f.firebaseapp.com",
-            databaseURL: "https://kasir-abc5f-default-rtdb.asia-southeast1.firebasedatabase.app/",
-            projectId: "kasir-abc5f",
-            storageBucket: "kasir-abc5f.firebasestorage.app",
-            messagingSenderId: "442202046937",
-            appId: "1:442202046937:web:f55a5871ac7cfbb91159c8"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+  <div class="card">
+    <div class="card-title">📦 Mode Pengurangan Stok</div>
+    <div class="mode-toggle-wrap">
+      <button class="mode-toggle-btn" id="mode-btn-fifo"   onclick="setStokMode('fifo')">📋 FIFO</button>
+      <button class="mode-toggle-btn" id="mode-btn-atomic" onclick="setStokMode('atomic')">⚡ ATOMIC</button>
+    </div>
+    <div class="mode-desc" id="mode-desc-text">Memuat...</div>
+  </div>
 
-        let MASTER_MENU = {}; let cart = []; let stokFIFO = {}; let currentRole = "";
+  <div class="card">
+    <div class="card-title">💬 Monitor Chat Semua Channel</div>
+    <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:12px;">
+      Owner dapat membaca seluruh riwayat percakapan dari semua channel dan semua role.
+    </p>
+    <div id="owner-chat-monitor" style="background:var(--ink3);border:1px solid var(--border);padding:12px;max-height:300px;overflow-y:auto;font-size:12px;"></div>
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <button class="reset-btn" onclick="ownerClearChat()">🗑 HAPUS SEMUA CHAT</button>
+    </div>
+  </div>
 
-        function handleLogin() {
-            const pin = document.getElementById('pass-input').value;
-            const navs = document.querySelectorAll('.nav-bar button');
-            navs.forEach(n => n.style.display = 'none');
-            document.querySelectorAll('.owner-only').forEach(e => e.style.display = 'none');
+  <div class="card" style="border-color:rgba(232,84,84,0.2);">
+    <div class="card-title" style="color:var(--red);">⚠️ Database Controls (Danger Zone)</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="reset-btn" onclick="resetGudang()">RESET STOK</button>
+      <button class="reset-btn" onclick="resetLaporan()">RESET LAPORAN</button>
+      <button class="reset-btn" onclick="ownerResetOrders()">RESET ORDERS</button>
+      <button class="reset-btn" onclick="ownerResetAll()">⚠️ RESET SEMUA DATA</button>
+    </div>
+  </div>
+</div>
 
-            if(pin === "1111") { currentRole = "waiter"; ['nav-waiter', 'nav-antar'].forEach(i => document.getElementById(i).style.display = 'block'); showApp('waiter'); }
-            else if(pin === "2222") { currentRole = "dapur"; document.getElementById('nav-dapur').style.display = 'block'; showApp('dapur'); }
-            else if(pin === "3333") { currentRole = "kasir"; ['nav-kasir', 'nav-stok'].forEach(i => document.getElementById(i).style.display = 'block'); showApp('kasir'); }
-            else if(pin === "4444") { 
-                currentRole = "owner"; navs.forEach(n => n.style.display = 'block');
-                document.querySelectorAll('.owner-only').forEach(e => e.style.display = 'block');
-                showApp('laporan');
-            } else { alert("PIN Salah!"); return; }
-            document.querySelector('.btn-logout').style.display = 'block';
-        }
 
-        function signOut() { location.reload(); }
-        function showApp(v) { document.getElementById('view-home').style.display = 'none'; document.getElementById('main-nav').style.display = 'flex'; switchView(v); }
-        function switchView(v) {
-            document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
-            document.querySelectorAll('.nav-bar button').forEach(e => e.classList.remove('active'));
-            document.getElementById('view-'+v).classList.add('active');
-            if(document.getElementById('nav-'+v)) document.getElementById('nav-'+v).classList.add('active');
-        }
+<!-- CHAT BUBBLE -->
+<div id="chat-bubble">
+  <div id="chat-window">
+    <div class="chat-win-header">
+      <div>
+        <div class="chat-win-title">💬 CHAT KAFE</div>
+        <div class="chat-win-sub">Semua pesan real-time</div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-channel-tabs" id="chat-tabs"></div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-wrap">
+      <textarea class="chat-input" id="chat-input" placeholder="Tulis pesan..." rows="1" onkeydown="chatKeydown(event)"></textarea>
+      <button class="chat-send-btn" onclick="sendChat()">↑</button>
+    </div>
+  </div>
+  <button class="chat-fab" onclick="toggleChat()">
+    💬
+    <span class="chat-unread" id="chat-unread">0</span>
+  </button>
+</div>
 
-        function formatTimer(ms) {
-            let s = Math.floor(ms / 1000); let h = Math.floor(s / 3600); s %= 3600; let m = Math.floor(s / 60); s %= 60;
-            return [h, m, s].map(v => v < 10 ? "0" + v : v).join(":");
-        }
+<!-- DEVELOPER PANEL VIEW -->
+<div id="view-dev" class="view">
+  <div class="page-header">
+    <div class="page-title">🛠️ <span>Developer Panel</span></div>
+    <div class="page-count" id="dev-version">v2.0</div>
+  </div>
 
-        db.ref('master_menu').on('value', snap => { MASTER_MENU = snap.val() || {}; renderMenu(); renderDropdown(); renderStokList(); });
-        db.ref('stok_fifo').on('value', snap => { stokFIFO = snap.val() || {}; renderMenu(); renderStokList(); });
+  <div class="dev-card" style="background:rgba(167,139,250,0.05);border-color:rgba(167,139,250,0.2);">
+    <div style="font-size:12px;color:var(--text);line-height:1.7;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:2px;margin-bottom:8px;">ℹ️ INFORMASI AKSES</div>
+      <ul style="margin-left:18px;color:var(--text2);">
+        <li style="margin:5px 0;"><b style="color:var(--purple)">Developer</b> hanya memiliki fungsi untuk generate PIN operasional.</li>
+        <li style="margin:5px 0;"><b style="color:var(--accent)">Owner</b> tidak bisa generate PIN — semua PIN dibuat di sini.</li>
+        <li style="margin:5px 0;">PIN <b style="color:var(--accent)">Owner</b> juga dibuat oleh Developer untuk keamanan maksimal.</li>
+        <li style="margin:5px 0;">Fungsi monitor chat dan kontrol database telah dipindahkan ke <b style="color:var(--accent)">Owner Panel</b>.</li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="dev-card">
+    <div class="dev-section-title">🔑 Generate PIN Semua Role</div>
+    <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:16px;">
+      Developer dapat generate PIN sekali pakai untuk <b style="color:var(--purple)">semua role</b> termasuk Owner.
+      PIN hangus otomatis setelah digunakan. PIN disimpan di Firebase path <code style="color:var(--accent);font-size:11px;">otp_pins</code>.
+    </p>
+    <div class="dev-pin-grid" id="dev-pin-grid"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+      <button class="dev-gen-all-btn" onclick="devGenerateAll()">⟳ GENERATE SEMUA SEKALIGUS</button>
+      <button class="dev-danger-btn" onclick="devRevokeAll()">✕ HAPUS SEMUA PIN AKTIF</button>
+    </div>
+  </div>
+</div>
 
-        db.ref('orders').on('value', snap => {
-            let dH="", aH="", kH=""; let orders = [];
-            snap.forEach(c => { orders.push({ key: c.key, ...c.val() }); });
-            orders.sort((a, b) => a.ts - b.ts);
-            orders.forEach(o => {
-                const itemsStr = o.items.map(i => `${i.n} x${i.qty}`).join(", ");
-                const diff = Date.now() - o.ts;
-                const card = `<div class="card" data-ts="${o.ts}"><div style="display:flex; justify-content:space-between;"><b>Meja ${o.meja}</b><span class="timer-badge">⏳ <span class="live-timer">${formatTimer(diff)}</span></span></div><p>${itemsStr}</p>`;
-                if(o.status==='masak') dH += card + `<button class="btn btn-primary" onclick="db.ref('orders/${o.key}/status').set('antar')">SIAP SAJI</button></div>`;
-                else if(o.status==='antar') aH += card + `<button class="btn btn-success" onclick="db.ref('orders/${o.key}/status').set('kasir')">DIANTAR</button></div>`;
-                else if(o.status==='kasir') {
-                    kH += card + `<div style="background:#f1f5f9; padding:10px; border-radius:12px; margin-bottom:10px;"><small>Total: <b>Rp ${o.total.toLocaleString()}</b></small><input type="number" id="cash-${o.key}" placeholder="Tunai..."></div><button class="btn btn-primary" onclick="bayarDanCetak('${o.key}')">BAYAR & CETAK</button></div>`;
-                }
-            });
-            document.getElementById('dapur-container').innerHTML = dH;
-            document.getElementById('antar-container').innerHTML = aH;
-            document.getElementById('kasir-container').innerHTML = kH;
-        });
+<div id="print-area"></div>
+<div id="toast-wrap"></div>
 
-        // FUNGSI HAPUS STOK MANUAL (SEKALIGUS)
-        async function kurangiStokManual() {
-            const id = document.getElementById('stok-item-select').value;
-            let qty = parseInt(document.getElementById('stok-qty-input').value);
-            if(!id || isNaN(qty) || qty <= 0) return alert("Pilih menu dan isi jumlah!");
-            let total = 0; if(stokFIFO[id]) Object.values(stokFIFO[id]).forEach(b => total += b.qty);
-            if(qty > total) return alert("Stok tidak cukup!");
-            if(confirm(`Hapus ${qty} stok dari ${MASTER_MENU[id].n}?`)) {
-                let needed = qty;
-                const bts = Object.keys(stokFIFO[id] || {}).map(k=>({k, ...stokFIFO[id][k]})).sort((a,b)=>a.ts-b.ts);
-                for(let b of bts) {
-                    if(needed <= 0) break;
-                    if(b.qty <= needed) { needed -= b.qty; await db.ref(`stok_fifo/${id}/${b.k}`).remove(); }
-                    else { await db.ref(`stok_fifo/${id}/${b.k}`).update({qty: b.qty - needed}); needed = 0; }
-                }
-                document.getElementById('stok-qty-input').value = "";
-            }
-        }
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+// ===== FIREBASE =====
+const firebaseConfig = {
+  apiKey: "AIzaSyD8-Ps6ompRiQ7ITKE9nYvOxzR77aL120U",
+  authDomain: "kasir-abc5f.firebaseapp.com",
+  databaseURL: "https://kasir-abc5f-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  projectId: "kasir-abc5f",
+  storageBucket: "kasir-abc5f.firebasestorage.app",
+  messagingSenderId: "442202046937",
+  appId: "1:442202046937:web:f55a5871ac7cfbb91159c8"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-        // FUNGSI HAPUS SATU PERSATU
-        async function hapusSatuPersatu(id) {
-            const bts = Object.keys(stokFIFO[id] || {}).map(k=>({k, ...stokFIFO[id][k]})).sort((a,b)=>a.ts-b.ts);
-            if(bts.length > 0) {
-                let first = bts[0];
-                if(first.qty > 1) await db.ref(`stok_fifo/${id}/${first.k}`).update({qty: first.qty - 1});
-                else await db.ref(`stok_fifo/${id}/${first.k}`).remove();
-            } else alert("Stok Kosong!");
-        }
+// ===== STATE =====
+let MASTER_MENU = {}, stokFIFO = {}, cart = [];
+let currentRole = '', pinBuffer = '';
+let stokMode = 'fifo';
+let otp_pins = {};
 
-        function renderStokList() {
-            let h = "<table><tr><th>Menu</th><th>Stok</th><th>Aksi</th></tr>";
-            for(let id in MASTER_MENU) {
-                let t = 0; if(stokFIFO[id]) Object.values(stokFIFO[id]).forEach(b => t += b.qty);
-                h += `<tr><td><b>${MASTER_MENU[id].n}</b></td><td>${t} unit</td><td><button class="btn-danger" style="width:auto; padding:5px 10px; font-size:10px;" onclick="hapusSatuPersatu('${id}')">-1 Unit</button> ${currentRole==='owner' ? `<button class="btn-danger" style="width:auto; padding:5px 10px; font-size:10px; background:black;" onclick="hapusMenu('${id}')">Hapus Menu</button>` : ''}</td></tr>`;
-            }
-            document.getElementById('stok-list-area').innerHTML = h + "</table>";
-        }
+// Developer PIN statis — HANYA ada di kode, tidak di Firebase
+const DEV_PIN   = '999999'; // GANTI sesuai kebutuhan
+// Owner PIN statis — dibuat oleh Developer via OTP atau login langsung
+const OWNER_PIN = '040404'; // fallback jika tidak ada OTP dari dev
 
-        function renderMenu() {
-            let h = "";
-            for(let id in MASTER_MENU) {
-                let total = 0; if(stokFIFO[id]) Object.values(stokFIFO[id]).forEach(b => total += b.qty);
-                h += `<div class="menu-item" onclick="addCart('${id}')"><span class="stock-tag ${total > 0 ? 's-ok' : 's-out'}">${total}</span><b>${MASTER_MENU[id].n}</b><br><small>Rp ${MASTER_MENU[id].h.toLocaleString()}</small></div>`;
-            }
-            document.getElementById('menu-container').innerHTML = h;
-        }
+// Semua role yang bisa di-generate OTP oleh Owner
+const STAFF_ROLES = [
+  { key: 'waiter', label: 'Waiter',  icon: '📦' },
+  { key: 'dapur',  label: 'Dapur',   icon: '👨‍🍳' },
+  { key: 'kasir',  label: 'Kasir',   icon: '💵' },
+];
+// Semua role yang bisa di-generate OTP oleh Developer (termasuk owner)
+const DEV_ROLES = [
+  { key: 'owner',  label: 'Owner',   icon: '👑' },
+  { key: 'waiter', label: 'Waiter',  icon: '📦' },
+  { key: 'dapur',  label: 'Dapur',   icon: '👨‍🍳' },
+  { key: 'kasir',  label: 'Kasir',   icon: '💵' },
+];
 
-        function addCart(id) {
-            let total = 0; if(stokFIFO[id]) Object.values(stokFIFO[id]).forEach(b => total += b.qty);
-            const ex = cart.find(c => c.id === id);
-            if(ex) { if(ex.qty < total) ex.qty++; else alert("Stok Habis!"); }
-            else { if(total > 0) cart.push({id, n:MASTER_MENU[id].n, h:MASTER_MENU[id].h, qty:1}); else alert("Stok Habis!"); }
-            renderCart();
-        }
+const NAV_ACCESS = {
+  waiter: ['waiter','antar'],
+  dapur:  ['dapur'],
+  kasir:  ['kasir','stok'],
+  owner:  ['waiter','dapur','antar','kasir','stok','laporan','owner'],
+  dev:    ['dev']
+};
 
-        function renderCart() {
-            document.getElementById('cart-box').style.display = cart.length ? 'block' : 'none';
-            document.getElementById('display-meja').innerText = document.getElementById('meja-input').value || "?";
-            document.getElementById('cart-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee;"><span><b>${i.n}</b> x${i.qty}</span><button onclick="batalSatu('${i.id}')" style="background:none; border:none; color:var(--danger); cursor:pointer;">Batal</button></div>`).join("");
-        }
+const FIRST_VIEW = { 
+  waiter:'waiter', 
+  dapur:'dapur', 
+  kasir:'kasir', 
+  owner:'owner',
+  dev:'dev'
+};
 
-        function batalSatu(id) { const idx = cart.findIndex(c => c.id === id); if(idx !== -1) { if(cart[idx].qty > 1) cart[idx].qty--; else cart.splice(idx, 1); } renderCart(); }
-        function cancelSemua() { cart = []; renderCart(); }
+const CHAT_CHANNELS = {
+  waiter: ['umum','waiter-antar'],
+  dapur:  ['umum','dapur'],
+  kasir:  ['umum','kasir'],
+  owner:  ['umum','waiter-antar','dapur','kasir'],
+  dev:    ['umum']  // Developer hanya bisa akses channel umum
+};
+const CHANNEL_LABELS = {
+  'umum':        { label:'# Umum',       color:'var(--accent)' },
+  'waiter-antar':{ label:'# Waiter↔Antar', color:'var(--blue)' },
+  'dapur':       { label:'# Dapur',      color:'var(--orange)' },
+  'kasir':       { label:'# Kasir',      color:'var(--green)' },
+};
+let currentChannel = 'umum';
+let chatOpen = false;
+let lastSeenTs = {};
+let chatUnread = 0;
 
-        async function kirimPesanan() {
-            const meja = document.getElementById('meja-input').value; if(!meja) return alert("Isi No Meja!");
-            for(let item of cart) {
-                let needed = item.qty; const bts = Object.keys(stokFIFO[item.id] || {}).map(k=>({k, ...stokFIFO[item.id][k]})).sort((a,b)=>a.ts-b.ts);
-                for(let b of bts) { if(needed <= 0) break; if(b.qty <= needed) { needed -= b.qty; await db.ref(`stok_fifo/${item.id}/${b.k}`).remove(); } else { await db.ref(`stok_fifo/${item.id}/${b.k}`).update({qty: b.qty - needed}); needed = 0; } }
-            }
-            db.ref('orders').push({ meja, items: cart, status: 'masak', ts: Date.now(), total: cart.reduce((a,b)=>a+(b.h*b.qty), 0) });
-            cart = []; document.getElementById('meja-input').value = ""; renderCart();
-        }
+// ===== UTILS =====
+function fRp(n) { return (n||0).toLocaleString('id-ID'); }
+function formatTimer(ms) {
+  let s=Math.floor(ms/1000), h=Math.floor(s/3600); s%=3600;
+  let m=Math.floor(s/60); s%=60;
+  return [h,m,s].map(v=>v<10?'0'+v:v).join(':');
+}
+function timerClass(ms) { return ms<600000?'normal':ms<1200000?'warn':'late'; }
+function totalStok(id) { if(!stokFIFO[id]) return 0; return Object.values(stokFIFO[id]).reduce((a,b)=>a+b.qty,0); }
+function stockBadgeClass(n) { return n===0?'badge-out':n<=3?'badge-low':'badge-ok'; }
+function showToast(msg, type='info') {
+  const el=document.createElement('div'); el.className=`toast ${type}`;
+  el.innerHTML=`<span>${type==='success'?'✓':type==='error'?'✕':'•'}</span><span>${msg}</span>`;
+  document.getElementById('toast-wrap').appendChild(el);
+  setTimeout(()=>el.remove(),2900);
+}
+function randPin6(exclude=[]) {
+  const avoid=new Set([DEV_PIN,OWNER_PIN,...exclude]);
+  let p; do { p=String(Math.floor(100000+Math.random()*900000)); } while(avoid.has(p));
+  return p;
+}
 
-        function bayarDanCetak(key) {
-            const cashInput = document.getElementById('cash-'+key).value;
-            if(!cashInput) return alert("Isi Tunai!");
-            db.ref('orders/'+key).once('value', snap => {
-                const o = snap.val(); const cash = parseInt(cashInput); const change = cash - o.total;
-                if(change < 0) return alert("Uang Kurang!");
-                const w = new Date().toLocaleString();
-                const template = `<div style="width:280px; padding:20px; font-family:monospace; background:white; color:black; border:1px solid #ccc;"><h3>CAFE</h3><p>${w}</p><hr>${o.items.map(i=>`<div>${i.n} x${i.qty}</div>`).join('')}<hr>TOTAL: ${o.total.toLocaleString()}<br>TUNAI: ${cash.toLocaleString()}<br>KEMBALI: ${change.toLocaleString()}</div>`;
-                document.getElementById('print-area').innerHTML = template;
-                setTimeout(() => { window.print(); db.ref('laporan').push({...o, tgl:w}).then(() => db.ref('orders/'+key).remove()); }, 300);
-            });
-        }
+// ===== PIN INPUT =====
+function addPin(d) {
+  if (pinBuffer.length>=6) return;
+  pinBuffer+=d; updatePinDots();
+  if (pinBuffer.length===6) setTimeout(doLogin,120);
+}
+function clearPin() {
+  pinBuffer=pinBuffer.slice(0,-1); updatePinDots();
+  document.getElementById('login-error').textContent='';
+}
+function updatePinDots() {
+  document.querySelectorAll('.pin-dot').forEach((d,i)=>{
+    d.classList.toggle('filled', i<pinBuffer.length);
+    d.classList.remove('error');
+  });
+}
+function showPinError(msg) {
+  document.querySelectorAll('.pin-dot').forEach(d=>{d.classList.remove('filled');d.classList.add('error');});
+  document.getElementById('login-error').textContent=msg;
+  pinBuffer='';
+  setTimeout(()=>document.querySelectorAll('.pin-dot').forEach(d=>d.classList.remove('error')),600);
+}
 
-        function tambahMasterMenu() { const n = document.getElementById('new-menu-name').value; const h = parseInt(document.getElementById('new-menu-price').value); if(n && h) db.ref('master_menu').push({ n, h }).then(() => { document.getElementById('new-menu-name').value = ""; document.getElementById('new-menu-price').value = ""; }); }
-        function renderDropdown() { let h = ""; for(let id in MASTER_MENU) h += `<option value="${id}">${MASTER_MENU[id].n}</option>`; document.getElementById('stok-item-select').innerHTML = h; }
-        function tambahStokBatch() { const id = document.getElementById('stok-item-select').value; const q = parseInt(document.getElementById('stok-qty-input').value); if(q) db.ref('stok_fifo/'+id).push({ qty: q, ts: Date.now() }).then(() => document.getElementById('stok-qty-input').value = ""); }
-        function resetLaporan() { if(confirm("Hapus laporan?")) db.ref('laporan').remove(); }
-        function resetGudang() { if(confirm("Hapus stok?")) db.ref('stok_fifo').remove(); }
-        function hapusMenu(id) { if(confirm("Hapus menu?")) { db.ref('master_menu/'+id).remove(); db.ref('stok_fifo/'+id).remove(); } }
+async function doLogin() {
+  const pin=pinBuffer;
+  if (pin===DEV_PIN) { currentRole='dev'; showApp('dev'); return; }
+  if (pin===OWNER_PIN) { currentRole='owner'; showApp('owner'); return; }
+  try {
+    const snap=await db.ref('otp_pins').once('value');
+    const pins=snap.val()||{};
+    let role=null, pinKey=null;
+    for(const [k,d] of Object.entries(pins)) {
+      if (d.pin===pin && d.status==='active') { role=d.role; pinKey=k; break; }
+    }
+    if (!role) { showPinError('PIN salah atau sudah kadaluarsa'); return; }
+    await db.ref(`otp_pins/${pinKey}`).update({ status:'used', usedAt:Date.now() });
+    currentRole=role; showApp(role);
+  } catch(e) { showPinError('Koneksi gagal, coba lagi'); }
+}
 
-        db.ref('laporan').on('value', snap => {
-            let t = 0; let h = ""; snap.forEach(c => { t += c.val().total; h += `<div style="padding:15px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><span>Meja ${c.val().meja}</span><b>Rp ${c.val().total.toLocaleString()}</b></div>`; });
-            document.getElementById('lap-omzet').innerText = "Omzet: Rp " + t.toLocaleString(); document.getElementById('lap-body').innerHTML = h;
-        });
+// ===== APP SHELL =====
+function showApp(role) {
+  document.getElementById('screen-login').style.display='none';
+  document.getElementById('topbar').classList.add('visible');
+  document.getElementById('role-badge').textContent=role==='dev'?'DEV':role.toUpperCase();
+  if(role==='dev') document.getElementById('role-badge').style.background='rgba(167,139,250,0.15)';
+  if(role==='dev') document.getElementById('role-badge').style.color='var(--purple)';
+  const allowed=NAV_ACCESS[role];
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('visible', allowed.includes(b.id.replace('nav-',''))));
+  document.querySelectorAll('.owner-section').forEach(e=>e.style.display=(role==='owner'||role==='dev')?'block':'none');
+  
+  document.getElementById('chat-bubble').classList.add('visible');
+  initChat(role);
+  switchView(FIRST_VIEW[role]);
+  showToast(`Selamat datang, ${role}!`,'success');
+}
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  const nb=document.getElementById('nav-'+v); if(nb) nb.classList.add('active');
+}
+function signOut() { cart=[]; currentRole=''; pinBuffer=''; location.reload(); }
 
-        setInterval(() => {
-            document.querySelectorAll('.card[data-ts]').forEach(card => {
-                const ts = parseInt(card.getAttribute('data-ts'));
-                const tDisp = card.querySelector('.live-timer');
-                if(tDisp) tDisp.innerText = formatTimer(Date.now() - ts);
-            });
-        }, 1000);
-    </script>
+// ===== STOK MODE =====
+const MODE_DESC = {
+  fifo:   '📋 <b style="color:var(--blue)">FIFO</b> — Stok yang masuk paling lama dikurangi duluan. Cocok untuk produk dengan expired date. Pengurangan dilakukan secara berurutan per batch.',
+  atomic: '⚡ <b style="color:var(--purple)">ATOMIC</b> — Pengurangan stok dikunci dalam satu operasi Firebase Transaction. Stok tidak bisa dikurangi dua kali bersamaan, mencegah race condition saat kafe ramai. <b>Direkomendasikan.</b>',
+};
+db.ref('settings/stok_mode').on('value', snap=>{
+  stokMode=snap.val()||'fifo'; updateModeBadge();
+});
+function updateModeBadge() {
+  const badge=document.getElementById('global-mode-badge'); if(!badge) return;
+  badge.textContent=stokMode.toUpperCase(); badge.className=`mode-badge ${stokMode}`;
+  const bf=document.getElementById('mode-btn-fifo'), ba=document.getElementById('mode-btn-atomic');
+  const de=document.getElementById('mode-desc-text');
+  if(bf){ bf.className='mode-toggle-btn'+(stokMode==='fifo'?' active-fifo':''); ba.className='mode-toggle-btn'+(stokMode==='atomic'?' active-atomic':''); de.innerHTML=MODE_DESC[stokMode]; }
+}
+async function setStokMode(mode) {
+  await db.ref('settings/stok_mode').set(mode);
+  showToast(`Mode stok → ${mode.toUpperCase()}`,'info');
+}
+
+// ===== MENU =====
+function renderMenu() {
+  const ids=Object.keys(MASTER_MENU);
+  if(!ids.length){ document.getElementById('menu-container').innerHTML='<div class="empty-state"><div class="empty-icon">🍽</div><div class="empty-text">Belum ada menu</div></div>'; return; }
+  document.getElementById('menu-container').innerHTML=ids.map(id=>{
+    const m=MASTER_MENU[id], stok=totalStok(id);
+    return `<div class="menu-item${stok===0?' out-of-stock':''}" id="mitem-${id}" onclick="addCart('${id}')">
+      <span class="stock-badge ${stockBadgeClass(stok)}">${stok}</span>
+      <div class="menu-name">${m.n}</div>
+      <div class="menu-price">Rp ${fRp(m.h)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== CART =====
+function addCart(id) {
+  const stok=totalStok(id), ex=cart.find(c=>c.id===id), inCart=ex?ex.qty:0;
+  if(inCart>=stok){showToast('Stok tidak cukup!','error');return;}
+  if(ex) ex.qty++; else cart.push({id,n:MASTER_MENU[id].n,h:MASTER_MENU[id].h,qty:1});
+  const el=document.getElementById('mitem-'+id);
+  if(el){el.classList.add('adding');setTimeout(()=>el.classList.remove('adding'),280);}
+  renderCart();
+}
+function changeQty(id,delta) {
+  const idx=cart.findIndex(c=>c.id===id); if(idx===-1) return;
+  cart[idx].qty+=delta; if(cart[idx].qty<=0) cart.splice(idx,1); renderCart();
+}
+function cancelSemua(){cart=[];renderCart();}
+function renderCart() {
+  const meja=document.getElementById('meja-input').value;
+  document.getElementById('cart-meja-display').textContent=meja?'#'+meja:'#—';
+  const wrap=document.getElementById('cart-items-wrap'), footer=document.getElementById('cart-footer');
+  if(!cart.length){wrap.innerHTML='<div class="cart-empty">Pilih menu untuk memesan</div>';footer.style.display='none';return;}
+  const total=cart.reduce((a,b)=>a+b.h*b.qty,0);
+  wrap.innerHTML=`<div class="cart-items">${cart.map(i=>`
+    <div class="cart-item">
+      <div class="cart-item-name">${i.n}</div>
+      <div class="qty-ctrl">
+        <button class="qty-btn minus" onclick="changeQty('${i.id}',-1)">−</button>
+        <span class="qty-num">${i.qty}</span>
+        <button class="qty-btn" onclick="changeQty('${i.id}',1)">+</button>
+      </div>
+    </div>`).join('')}</div>`;
+  footer.style.display='block';
+  document.getElementById('cart-total-display').textContent='Rp '+fRp(total);
+}
+
+// ===== KIRIM PESANAN =====
+async function kirimPesanan() {
+  const meja=document.getElementById('meja-input').value;
+  if(!meja){showToast('Isi nomor meja dulu!','error');return;}
+  if(!cart.length){showToast('Keranjang kosong!','error');return;}
+  const btn=document.getElementById('send-btn');
+  btn.disabled=true; btn.classList.add('loading'); btn.textContent='Memproses...';
+  try {
+    if(stokMode==='atomic') await kirimAtomic(meja);
+    else await kirimFIFO(meja);
+    showToast(`Pesanan Meja ${meja} dikirim!`,'success');
+    cart=[]; document.getElementById('meja-input').value=''; renderCart();
+  } catch(err){
+    showToast(err.message||'Gagal mengirim pesanan','error');
+  } finally {
+    btn.disabled=false; btn.classList.remove('loading'); btn.textContent='KIRIM KE DAPUR →';
+  }
+}
+
+async function kirimFIFO(meja) {
+  const snap=await db.ref('stok_fifo').once('value');
+  const cur=snap.val()||{};
+  for(const item of cart) {
+    let avail=0; if(cur[item.id]) Object.values(cur[item.id]).forEach(b=>avail+=b.qty);
+    if(avail<item.qty) throw new Error(`Stok "${item.n}" tidak cukup! Sisa ${avail}`);
+  }
+  for(const item of cart) await deductFIFO(item.id,item.qty);
+  await db.ref('orders').push({meja,items:cart,status:'masak',ts:Date.now(),total:cart.reduce((a,b)=>a+b.h*b.qty,0)});
+}
+
+async function kirimAtomic(meja) {
+  const snap=await db.ref('stok_fifo').once('value');
+  const cur=snap.val()||{};
+  for(const item of cart) {
+    let avail=0; if(cur[item.id]) Object.values(cur[item.id]).forEach(b=>avail+=b.qty);
+    if(avail<item.qty) throw new Error(`Stok "${item.n}" tidak cukup! Sisa ${avail}`);
+  }
+  for(const item of cart) await deductAtomic(item.id,item.qty);
+  await db.ref('orders').push({meja,items:cart,status:'masak',ts:Date.now(),total:cart.reduce((a,b)=>a+b.h*b.qty,0)});
+}
+
+async function deductFIFO(itemId,jumlah) {
+  const ref=db.ref(`stok_fifo/${itemId}`);
+  const snap=await ref.once('value');
+  const batches=[]; snap.forEach(c=>batches.push({key:c.key,...c.val()}));
+  batches.sort((a,b)=>a.ts-b.ts);
+  let needed=jumlah; const updates={};
+  for(const b of batches) {
+    if(needed<=0) break;
+    if(b.qty<=needed){updates[b.key]=null;needed-=b.qty;}
+    else{updates[b.key]={qty:b.qty-needed,ts:b.ts};needed=0;}
+  }
+  if(needed>0) throw new Error('Stok tidak cukup');
+  await ref.update(updates);
+}
+
+function deductAtomic(itemId,jumlah) {
+  const ref=db.ref(`stok_fifo/${itemId}`);
+  return new Promise((resolve,reject)=>{
+    ref.transaction(current=>{
+      if(!current) return;
+      const total=Object.values(current).reduce((a,b)=>a+(b.qty||0),0);
+      if(total<jumlah){reject(new Error('Stok tidak cukup (atomic)'));return undefined;}
+      const sorted=Object.entries(current).map(([k,v])=>({k,...v})).sort((a,b)=>a.ts-b.ts);
+      let needed=jumlah;
+      for(const b of sorted) {
+        if(needed<=0) break;
+        if((b.qty||0)<=needed){current[b.k]=null;needed-=b.qty;}
+        else{current[b.k]={qty:b.qty-needed,ts:b.ts};needed=0;}
+      }
+      return current;
+    },(err,committed)=>{
+      if(err) reject(err);
+      else if(!committed) reject(new Error('Transaksi dibatalkan (stok berubah)'));
+      else resolve();
+    },false);
+  });
+}
+
+// ===== RENDER ORDERS =====
+function renderOrders(orders) {
+  const by={masak:[],antar:[],kasir:[]};
+  orders.forEach(o=>{if(by[o.status]) by[o.status].push(o);});
+  const now=Date.now();
+
+  function buildCard(o,actionHtml) {
+    const diff=now-o.ts;
+    const items=o.items.map(i=>`<div class="order-item-row"><span>${i.n}</span><span class="order-item-qty">×${i.qty}</span></div>`).join('');
+    return `<div class="order-card ${o.status}" data-ts="${o.ts}">
+      <div class="order-card-top">
+        <div class="order-table"><small>MEJA</small>${o.meja}</div>
+        <div class="timer ${timerClass(diff)} live-timer" data-ts="${o.ts}">${formatTimer(diff)}</div>
+      </div>
+      <div class="order-items">${items}</div>
+      ${actionHtml}
+    </div>`;
+  }
+
+  const dEl=document.getElementById('dapur-container');
+  dEl.innerHTML=by.masak.length
+    ?by.masak.map(o=>buildCard(o,`<button class="action-btn masak-btn" onclick="updateStatus('${o.key}','antar',this)">SIAP SAJI ✓</button>`)).join('')
+    :'<div class="empty-state"><div class="empty-icon">✨</div><div class="empty-text">Semua pesanan selesai dimasak</div></div>';
+  document.getElementById('dapur-count').textContent=by.masak.length+' pesanan';
+
+  const aEl=document.getElementById('antar-container');
+  aEl.innerHTML=by.antar.length
+    ?by.antar.map(o=>buildCard(o,`<button class="action-btn antar-btn" onclick="updateStatus('${o.key}','kasir',this)">SUDAH DIANTAR ✓</button>`)).join('')
+    :'<div class="empty-state"><div class="empty-icon">✨</div><div class="empty-text">Tidak ada yang perlu diantar</div></div>';
+  document.getElementById('antar-count').textContent=by.antar.length+' pesanan';
+
+  const kEl=document.getElementById('kasir-container');
+  if(by.kasir.length){
+    kEl.innerHTML=by.kasir.map(o=>{
+      const diff2=now-o.ts;
+      const items=o.items.map(i=>`<div class="order-item-row"><span>${i.n}</span><span class="order-item-qty">×${i.qty}</span></div>`).join('');
+      return `<div class="order-card kasir" data-ts="${o.ts}">
+        <div class="order-card-top">
+          <div class="order-table"><small>MEJA</small>${o.meja}</div>
+          <div class="timer ${timerClass(diff2)} live-timer" data-ts="${o.ts}">${formatTimer(diff2)}</div>
+        </div>
+        <div class="order-items">${items}</div>
+        <div class="cash-section">
+          <div class="total-row"><div class="total-label">TOTAL</div><div class="total-amount">Rp ${fRp(o.total)}</div></div>
+          <div class="cash-input-wrap">
+            <span>Rp</span>
+            <input class="cash-input" id="cash-${o.key}" type="number" placeholder="Uang tunai" oninput="hitungKembalian('${o.key}',${o.total})">
+          </div>
+          <div class="change-display">
+            <span style="font-size:10px;color:var(--text2);font-family:var(--mono);">KEMBALIAN</span>
+            <span class="change-val" id="change-${o.key}">—</span>
+          </div>
+          <button class="pay-btn" id="pay-btn-${o.key}" onclick="bayarDanCetak('${o.key}',${o.total})" disabled>BAYAR & CETAK STRUK</button>
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    kEl.innerHTML='<div class="empty-state"><div class="empty-icon">✨</div><div class="empty-text">Tidak ada yang perlu dibayar</div></div>';
+  }
+  document.getElementById('kasir-count').textContent=by.kasir.length+' pesanan';
+}
+
+function hitungKembalian(key,total) {
+  const cash=parseInt(document.getElementById('cash-'+key).value)||0;
+  const change=cash-total;
+  const el=document.getElementById('change-'+key), btn=document.getElementById('pay-btn-'+key);
+  if(!cash){el.textContent='—';el.className='change-val';btn.disabled=true;return;}
+  if(change<0){el.textContent='Kurang Rp '+fRp(-change);el.className='change-val err';btn.disabled=true;}
+  else{el.textContent='Rp '+fRp(change);el.className='change-val ok';btn.disabled=false;}
+}
+
+async function updateStatus(key,status,btnEl) {
+  if(btnEl){btnEl.disabled=true;btnEl.textContent='...';}
+  try{await db.ref('orders/'+key+'/status').set(status);}
+  catch(e){showToast('Gagal update status','error');if(btnEl)btnEl.disabled=false;}
+}
+
+async function bayarDanCetak(key,total) {
+  const cash=parseInt(document.getElementById('cash-'+key).value);
+  if(!cash||cash<total){showToast('Uang tidak cukup!','error');return;}
+  const change=cash-total, btn=document.getElementById('pay-btn-'+key);
+  btn.disabled=true; btn.textContent='Memproses...';
+  try {
+    const snap=await db.ref('orders/'+key).once('value');
+    const o=snap.val(); if(!o){showToast('Pesanan tidak ditemukan','error');return;}
+    const w=new Date().toLocaleString('id-ID');
+    document.getElementById('print-area').innerHTML=`<div style="width:280px;padding:20px;font-family:'Space Mono',monospace;background:white;color:black;">
+      <div style="text-align:center;font-size:18px;font-weight:700;letter-spacing:6px;margin-bottom:4px;">KAFE</div>
+      <div style="text-align:center;font-size:10px;color:#666;margin-bottom:14px;">${w}</div>
+      <div style="border-top:1px dashed #ccc;border-bottom:1px dashed #ccc;padding:10px 0;margin-bottom:10px;">
+        ${o.items.map(i=>`<div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>${i.n} ×${i.qty}</span><span>Rp ${fRp(i.h*i.qty)}</span></div>`).join('')}
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>Subtotal</span><span>Rp ${fRp(o.total)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>Tunai</span><span>Rp ${fRp(cash)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin:8px 0 0;border-top:1px solid #000;padding-top:8px;"><span>KEMBALI</span><span>Rp ${fRp(change)}</span></div>
+      <div style="text-align:center;font-size:10px;color:#666;margin-top:16px;border-top:1px dashed #ccc;padding-top:10px;">Terima kasih sudah mampir! ☕</div>
+    </div>`;
+    setTimeout(async()=>{
+      window.print();
+      await db.ref('laporan').push({...o,tgl:w,cash,change});
+      await db.ref('orders/'+key).remove();
+      showToast('Pembayaran selesai!','success');
+    },300);
+  } catch(e){
+    showToast('Gagal proses pembayaran','error');
+    btn.disabled=false; btn.textContent='BAYAR & CETAK STRUK';
+  }
+}
+
+// ===== STOK =====
+function formatAge(ms) {
+  const m=Math.floor(ms/60000), h=Math.floor(m/60), d=Math.floor(h/24);
+  if(d>0) return d+'h yang lalu';
+  if(h>0) return h+'j yang lalu';
+  if(m>0) return m+'m yang lalu';
+  return 'baru saja';
+}
+function ageClass(ms) {
+  const days=ms/86400000;
+  if(days<1) return 'fresh';
+  if(days<3) return 'mid';
+  return 'old';
+}
+function fDate(ts) {
+  const d=new Date(ts);
+  const tgl=d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+  const jam=d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  return {tgl,jam};
+}
+function toggleBatch(id) {
+  const detail=document.getElementById('batch-detail-'+id);
+  const icon=document.getElementById('expand-icon-'+id);
+  if(!detail) return;
+  detail.classList.toggle('open');
+  icon.classList.toggle('open');
+}
+
+function renderStokList() {
+  const ids=Object.keys(MASTER_MENU);
+  if(!ids.length){document.getElementById('stok-list-area').innerHTML='<div class="empty-state"><div class="empty-text">Belum ada menu</div></div>';return;}
+  const maxStok=Math.max(...ids.map(id=>totalStok(id)),1);
+  const now=Date.now();
+
+  const html=ids.map(id=>{
+    const m=MASTER_MENU[id];
+    const t=totalStok(id);
+    const pct=Math.round(t/maxStok*100);
+    const color=t===0?'var(--red)':t<=3?'var(--orange)':'var(--green)';
+
+    const rawBatches=stokFIFO[id]?Object.entries(stokFIFO[id]).map(([k,v])=>({k,...v})):[];
+    rawBatches.sort((a,b)=>a.ts-b.ts);
+
+    const badgeStyle=t===0
+      ?'background:rgba(232,84,84,0.15);color:var(--red);border:1px solid rgba(232,84,84,0.2);'
+      :t<=3
+        ?'background:rgba(232,138,48,0.15);color:var(--orange);border:1px solid rgba(232,138,48,0.2);'
+        :'background:rgba(78,203,113,0.15);color:var(--green);border:1px solid rgba(78,203,113,0.2);';
+
+    const delBtn=currentRole==='owner'
+      ?`<button class="mini-btn" onclick="event.stopPropagation();hapusMenu('${id}')" style="border-color:rgba(232,84,84,0.3);color:var(--red);">Hapus Menu</button>`:'';
+
+    let batchRows='';
+    if(rawBatches.length===0){
+      batchRows=`<div style="padding:18px 16px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--text2);">Stok kosong</div>`;
+    } else {
+      rawBatches.forEach((b,i)=>{
+        const dt=fDate(b.ts), age=now-b.ts, isFirst=i===0;
+        const nextLabel=isFirst?`<span style="font-size:9px;font-family:var(--mono);color:var(--accent);margin-left:6px;">▶ KELUAR DULUAN</span>`:'';
+        batchRows+=`<div class="batch-row${isFirst?' next-out':''}">
+          <div><span class="batch-num${isFirst?' first':''}">${i+1}</span></div>
+          <div class="batch-date">
+            ${dt.tgl}${nextLabel}
+            <small>${dt.jam}</small>
+          </div>
+          <div class="batch-qty-val">${b.qty} unit</div>
+          <div><span class="batch-age ${ageClass(age)}">${formatAge(age)}</span></div>
+          <div class="batch-actions">
+            <button class="batch-del-btn" onclick="hapusBatchSatu('${id}','${b.k}',${b.qty})">−1</button>
+            ${currentRole==='owner'?`<button class="batch-del-btn" onclick="hapusBatchSeluruh('${id}','${b.k}',${b.qty})">Hapus</button>`:''}
+          </div>
+        </div>`;
+      });
+    }
+
+    const nextOut=rawBatches[0];
+    const footerInfo=nextOut
+      ?`FIFO berikutnya: <span>Batch ${fDate(nextOut.ts).tgl} · ${nextOut.qty} unit</span>`
+      :'Stok kosong';
+
+    return `<div class="stok-item-block">
+      <div class="stok-item-header" onclick="toggleBatch('${id}')">
+        <div class="stok-item-left">
+          <div class="stok-item-name">${m.n}</div>
+          <span class="stok-total-badge" style="${badgeStyle}">${t} unit</span>
+          <span style="font-family:var(--mono);font-size:9px;color:var(--text2);">${rawBatches.length} batch</span>
+        </div>
+        <div class="stok-item-right">
+          <div class="stok-bar-inline">
+            <div class="stok-bar-sm"><div class="stok-bar-sm-fill" style="width:${pct}%;background:${color};"></div></div>
+          </div>
+          ${delBtn}
+          <span class="expand-icon" id="expand-icon-${id}">▼</span>
+        </div>
+      </div>
+      <div class="batch-detail" id="batch-detail-${id}">
+        <div class="batch-header-row">
+          <div>#</div><div>Tanggal Masuk</div><div>Jumlah</div><div>Umur Stok</div><div>Aksi</div>
+        </div>
+        ${batchRows}
+        <div class="stok-item-footer">
+          <div class="fifo-info">${footerInfo}</div>
+          <button class="mini-btn" onclick="hapusSatuPersatu('${id}')">−1 unit (FIFO)</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('stok-list-area').innerHTML=html;
+}
+
+async function hapusBatchSatu(itemId, batchKey, currentQty) {
+  const ref=db.ref(`stok_fifo/${itemId}/${batchKey}`);
+  if(currentQty>1) await ref.update({qty:currentQty-1});
+  else await ref.remove();
+}
+async function hapusBatchSeluruh(itemId, batchKey, qty) {
+  if(!confirm(`Hapus batch ini (${qty} unit)?`)) return;
+  await db.ref(`stok_fifo/${itemId}/${batchKey}`).remove();
+  showToast(`Batch dihapus`,'info');
+}
+function renderDropdown(){
+  let h=''; Object.keys(MASTER_MENU).forEach(id=>h+=`<option value="${id}">${MASTER_MENU[id].n}</option>`);
+  document.getElementById('stok-item-select').innerHTML=h||'<option>— belum ada menu —</option>';
+}
+async function tambahStokBatch(){
+  const id=document.getElementById('stok-item-select').value, q=parseInt(document.getElementById('stok-qty-input').value);
+  if(!id||!q||q<=0){showToast('Pilih menu dan isi jumlah','error');return;}
+  await db.ref('stok_fifo/'+id).push({qty:q,ts:Date.now()});
+  document.getElementById('stok-qty-input').value='';
+  showToast(`+${q} stok ditambahkan`,'success');
+}
+async function kurangiStokManual(){
+  const id=document.getElementById('stok-item-select').value, qty=parseInt(document.getElementById('stok-qty-input').value);
+  if(!id||!qty||qty<=0){showToast('Pilih menu dan isi jumlah','error');return;}
+  const total=totalStok(id);
+  if(qty>total){showToast(`Stok hanya tersisa ${total}!`,'error');return;}
+  if(!confirm(`Hapus ${qty} stok dari ${MASTER_MENU[id].n}?`)) return;
+  try{await deductFIFO(id,qty);document.getElementById('stok-qty-input').value='';showToast(`−${qty} stok dihapus`,'info');}
+  catch(e){showToast(e.message,'error');}
+}
+async function hapusSatuPersatu(id){
+  const ref=db.ref(`stok_fifo/${id}`), snap=await ref.once('value');
+  const batches=[]; snap.forEach(c=>batches.push({key:c.key,...c.val()}));
+  batches.sort((a,b)=>a.ts-b.ts);
+  if(!batches.length){showToast('Stok sudah kosong!','error');return;}
+  const f=batches[0];
+  if(f.qty>1) await ref.child(f.key).update({qty:f.qty-1});
+  else await ref.child(f.key).remove();
+}
+function tambahMasterMenu(){
+  const n=document.getElementById('new-menu-name').value.trim(), h=parseInt(document.getElementById('new-menu-price').value);
+  if(!n||!h||h<=0){showToast('Isi nama dan harga menu!','error');return;}
+  db.ref('master_menu').push({n,h}).then(()=>{
+    document.getElementById('new-menu-name').value='';
+    document.getElementById('new-menu-price').value='';
+    showToast(`Menu "${n}" didaftarkan!`,'success');
+  });
+}
+function hapusMenu(id){
+  if(!confirm(`Hapus menu "${MASTER_MENU[id].n}"?`)) return;
+  db.ref('master_menu/'+id).remove(); db.ref('stok_fifo/'+id).remove();
+  showToast('Menu dihapus','info');
+}
+function resetGudang(){if(!confirm('Reset semua stok?'))return;db.ref('stok_fifo').remove().then(()=>showToast('Stok direset','info'));}
+function resetLaporan(){if(!confirm('Hapus semua laporan?'))return;db.ref('laporan').remove().then(()=>showToast('Laporan direset','info'));}
+
+// ===== CHAT =====
+function initChat(role) {
+  const channels = CHAT_CHANNELS[role] || ['umum'];
+  currentChannel = channels[0];
+  renderChatTabs(channels);
+  listenChat();
+}
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  document.getElementById('chat-window').classList.toggle('open', chatOpen);
+  if(chatOpen) {
+    chatUnread=0; document.getElementById('chat-unread').textContent='0';
+    document.getElementById('chat-unread').classList.remove('show');
+    lastSeenTs[currentChannel]=Date.now();
+    scrollChatBottom();
+    setTimeout(()=>document.getElementById('chat-input').focus(),100);
+  }
+}
+
+function renderChatTabs(channels) {
+  document.getElementById('chat-tabs').innerHTML = channels.map(ch=>`
+    <button class="chat-tab${ch===currentChannel?' active':''}" id="tab-${ch}" onclick="switchChannel('${ch}')">
+      ${CHANNEL_LABELS[ch]?.label||ch}
+      <span class="tab-dot" id="dot-${ch}"></span>
+    </button>`).join('');
+}
+
+function switchChannel(ch) {
+  currentChannel=ch;
+  const channels=CHAT_CHANNELS[currentRole]||['umum'];
+  renderChatTabs(channels);
+  lastSeenTs[ch]=Date.now();
+  document.getElementById('dot-'+ch)?.classList.remove('show');
+  scrollChatBottom();
+}
+
+let chatListener=null;
+function listenChat() {
+  if(chatListener) chatListener();
+  chatListener = db.ref('chat').limitToLast(200).on('value', snap=>{
+    renderChatMessages(snap.val()||{});
+    updateOwnerMonitor(snap.val()||{});
+  });
+}
+
+function renderChatMessages(allMsgs) {
+  const msgs=Object.entries(allMsgs)
+    .map(([k,v])=>({k,...v}))
+    .filter(m=>m.channel===currentChannel)
+    .sort((a,b)=>a.ts-b.ts);
+
+  const el=document.getElementById('chat-messages'); if(!el) return;
+  if(!msgs.length){el.innerHTML='<div style="text-align:center;color:var(--text2);font-family:var(--mono);font-size:11px;padding:30px 0;">Belum ada pesan</div>';return;}
+  el.innerHTML=msgs.map(m=>{
+    const isMine=m.role===currentRole;
+    const t=new Date(m.ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+    const roleColor=m.role==='owner'?'var(--accent)':m.role==='dev'?'var(--purple)':m.role==='dapur'?'var(--orange)':m.role==='kasir'?'var(--green)':'var(--blue)';
+    if(m.type==='system') return `<div class="chat-msg system-msg"><span class="system-text">— ${m.text} —</span></div>`;
+    return `<div class="chat-msg ${isMine?'mine':'theirs'}">
+      <div class="msg-sender ${isMine?'mine-label':'theirs-label'}" style="color:${roleColor}">${m.role.toUpperCase()}</div>
+      <div class="msg-text">${escapeHtml(m.text)}</div>
+      <div class="msg-time">${t}</div>
+    </div>`;
+  }).join('');
+  if(chatOpen) scrollChatBottom();
+  else {
+    const lastTs=msgs[msgs.length-1]?.ts||0;
+    if(lastTs>(lastSeenTs[currentChannel]||0) && msgs[msgs.length-1]?.role!==currentRole){
+      chatUnread++; document.getElementById('chat-unread').textContent=chatUnread>9?'9+':chatUnread;
+      document.getElementById('chat-unread').classList.add('show');
+    }
+  }
+  const channels=CHAT_CHANNELS[currentRole]||['umum'];
+  channels.forEach(ch=>{
+    if(ch===currentChannel) return;
+    const chMsgs=Object.values(allMsgs).filter(m=>m.channel===ch);
+    const lastChTs=chMsgs.length?Math.max(...chMsgs.map(m=>m.ts)):0;
+    if(lastChTs>(lastSeenTs[ch]||0)){
+      document.getElementById('dot-'+ch)?.classList.add('show');
+    }
+  });
+}
+
+function scrollChatBottom() {
+  const el=document.getElementById('chat-messages');
+  if(el) setTimeout(()=>{el.scrollTop=el.scrollHeight;},50);
+}
+
+function escapeHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function sendChat() {
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim(); if(!text) return;
+  input.value=''; input.style.height='auto';
+  await db.ref('chat').push({ role:currentRole, text, channel:currentChannel, ts:Date.now() });
+  lastSeenTs[currentChannel]=Date.now();
+  scrollChatBottom();
+}
+
+function chatKeydown(e) {
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
+}
+
+// ===== DEVELOPER PANEL (GENERATE PIN) =====
+// Menggunakan OTP PINS listener dari main logic yang ada di line 811
+db.ref('otp_pins').on('value', snap=>{
+  otp_pins=snap.val()||{}; 
+  renderDevPins(); // Render grid PIN
+});
+
+function renderDevPins() {
+  const el=document.getElementById('dev-pin-grid'); if(!el) return;
+  el.innerHTML=DEV_ROLES.map(r=>{
+    // Cek di Firebase state (otp_pins) mana yang statusnya active untuk role ini
+    const active=Object.entries(otp_pins).find(([,d])=>d.role===r.key&&d.status==='active');
+    const pinKey=active?active[0]:null, pinData=active?active[1]:null;
+    const display=pinData
+      ?`<div class="dev-pin-code">${pinData.pin}</div><div class="dev-pin-status active">● AKTIF — sekali pakai</div>`
+      :`<div class="dev-pin-code empty">— — — —</div><div class="dev-pin-status none">Belum ada PIN</div>`;
+    const revoke=pinData?`<button class="dev-revoke-btn" onclick="devRevokePin('${pinKey}')">✕ BATALKAN</button>`:'';
+    return `<div class="dev-pin-card">
+      <div class="dev-pin-icon">${r.icon}</div>
+      <div class="dev-pin-role">${r.label}</div>
+      ${display}
+      <button class="dev-gen-btn" onclick="devGeneratePin('${r.key}')">⟳ GENERATE PIN</button>
+      ${revoke}
+    </div>`;
+  }).join('');
+}
+
+async function devGeneratePin(role) {
+  const used=Object.values(otp_pins).filter(d=>d.status==='active').map(d=>d.pin);
+  const existing=Object.entries(otp_pins).filter(([,d])=>d.role===role&&d.status==='active');
+  for(const [k] of existing) await db.ref(`otp_pins/${k}`).remove();
+  const pin=randPin6(used);
+  await db.ref('otp_pins').push({role,pin,status:'active',createdAt:Date.now(),createdBy:'dev'});
+  showToast(`PIN ${role}: ${pin}`,'success');
+}
+
+async function devGenerateAll() {
+  if(!confirm('Generate PIN baru untuk semua role sekaligus?')) return;
+  const used=[];
+  for(const r of DEV_ROLES){
+    const ex=Object.entries(otp_pins).filter(([,d])=>d.role===r.key&&d.status==='active');
+    for(const [k] of ex) await db.ref(`otp_pins/${k}`).remove();
+    const pin=randPin6(used); used.push(pin);
+    await db.ref('otp_pins').push({role:r.key,pin,status:'active',createdAt:Date.now(),createdBy:'dev'});
+  }
+  showToast('Semua PIN berhasil digenerate!','success');
+}
+
+async function devRevokePin(key) {
+  await db.ref(`otp_pins/${key}`).remove();
+  showToast('PIN dibatalkan','info');
+}
+
+async function devRevokeAll() {
+  if(!confirm('Batalkan SEMUA PIN aktif?')) return;
+  const active=Object.entries(otp_pins).filter(([,d])=>d.status==='active');
+  for(const [k] of active) await db.ref(`otp_pins/${k}`).remove();
+  showToast('Semua PIN aktif dihapus','info');
+}
+
+// ===== FUNGSI OWNER UNTUK MEMANTAU CHAT =====
+function updateOwnerMonitor(allMsgs) {
+  const el=document.getElementById('owner-chat-monitor'); if(!el) return;
+  const msgs=Object.entries(allMsgs).map(([k,v])=>({k,...v})).sort((a,b)=>a.ts-b.ts);
+  if(!msgs.length){el.innerHTML='<span style="color:var(--text2);font-family:var(--mono);font-size:11px;">Belum ada chat</span>';return;}
+  const roleColor=r=>r==='owner'?'var(--accent)':r==='dev'?'var(--purple)':r==='dapur'?'var(--orange)':r==='kasir'?'var(--green)':'var(--blue)';
+  el.innerHTML=msgs.map(m=>{
+    const t=new Date(m.ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+    const chLabel=CHANNEL_LABELS[m.channel]?.label||m.channel;
+    if(m.type==='system') return `<div style="color:var(--muted);font-family:var(--mono);font-size:10px;padding:3px 0;">— ${m.text} —</div>`;
+    return `<div style="padding:4px 0;border-bottom:1px solid var(--ink3);display:flex;gap:8px;align-items:baseline;">
+      <span style="font-family:var(--mono);font-size:9px;color:var(--text2);">${t}</span>
+      <span style="font-family:var(--mono);font-size:9px;color:${roleColor(m.role)};">[${m.role}]</span>
+      <span style="font-size:9px;color:var(--text2);">${chLabel}</span>
+      <span style="font-size:12px;flex:1;">${escapeHtml(m.text)}</span>
+    </div>`;
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+// ===== DATABASE CONTROLS YANG DIPINDAH KE OWNER =====
+async function ownerClearChat() {
+  if(!confirm('Hapus SEMUA chat? Tidak bisa dikembalikan!')) return;
+  await db.ref('chat').remove();
+  showToast('Semua chat dihapus','info');
+}
+
+async function ownerResetOrders() {
+  if(!confirm('Hapus semua pesanan aktif?')) return;
+  await db.ref('orders').remove();
+  showToast('Semua orders dihapus','info');
+}
+
+async function ownerResetAll() {
+  if(!confirm('⚠️ RESET SEMUA DATA (stok, laporan, orders, chat, pins)? INI TIDAK BISA DIBATALKAN!')) return;
+  if(!confirm('Yakin benar-benar ingin reset SEMUA DATA?')) return;
+  await Promise.all([
+    db.ref('orders').remove(),
+    db.ref('laporan').remove(),
+    db.ref('stok_fifo').remove(),
+    db.ref('chat').remove(),
+    db.ref('otp_pins').remove(),
+  ]);
+  showToast('Semua data direset','info');
+}
+
+// ===== FIREBASE LISTENERS =====
+db.ref('master_menu').on('value',snap=>{MASTER_MENU=snap.val()||{};renderMenu();renderDropdown();renderStokList();});
+db.ref('stok_fifo').on('value',snap=>{stokFIFO=snap.val()||{};renderMenu();renderStokList();});
+db.ref('orders').on('value',snap=>{
+  const orders=[]; snap.forEach(c=>orders.push({key:c.key,...c.val()}));
+  orders.sort((a,b)=>a.ts-b.ts); renderOrders(orders);
+});
+db.ref('laporan').on('value',snap=>{
+  let total=0,count=0; const rows=[];
+  snap.forEach(c=>rows.push(c.val())); rows.reverse();
+  rows.forEach(r=>{total+=r.total;count++;});
+  const h=rows.map(r=>`<div class="laporan-item">
+    <div><div class="lap-meja">Meja ${r.meja}</div><div class="lap-time">${r.tgl}</div></div>
+    <div class="lap-total">Rp ${fRp(r.total)}</div>
+  </div>`).join('');
+  document.getElementById('lap-omzet').textContent='Rp '+fRp(total);
+  document.getElementById('lap-count').textContent=count;
+  document.getElementById('lap-avg').textContent='Rp '+fRp(count?Math.round(total/count):0);
+  document.getElementById('lap-body').innerHTML=h||'<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-text">Belum ada transaksi</div></div>';
+});
+
+// ===== LIVE TIMER =====
+setInterval(()=>{
+  document.querySelectorAll('.live-timer[data-ts]').forEach(el=>{
+    const ts=parseInt(el.getAttribute('data-ts')), diff=Date.now()-ts;
+    el.textContent=formatTimer(diff);
+    el.className=`timer ${timerClass(diff)} live-timer`;
+    el.setAttribute('data-ts',ts);
+  });
+},1000);
+
+document.addEventListener('input',e=>{if(e.target.id==='meja-input') renderCart();});
+</script>
 </body>
 </html>
