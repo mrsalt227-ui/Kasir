@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KAFE — Multi Server POS</title>
+<title>KAFE 78 — POS</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -17,65 +17,6 @@
 body{background:var(--ink);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");}
-
-/* ===== SPLASH / SERVER SELECT ===== */
-#screen-splash{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--ink);padding:24px;}
-.splash-logo{font-family:var(--mono);font-size:32px;font-weight:700;letter-spacing:8px;color:var(--accent);margin-bottom:6px;}
-.splash-sub{font-size:10px;letter-spacing:3px;color:var(--text2);text-transform:uppercase;margin-bottom:40px;}
-.splash-search{width:100%;max-width:440px;position:relative;margin-bottom:20px;}
-.splash-search input{width:100%;padding:13px 16px 13px 44px;background:var(--ink2);border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color .15s;}
-.splash-search input:focus{border-color:var(--accent);}
-.splash-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text2);font-size:16px;pointer-events:none;}
-.server-list{width:100%;max-width:440px;display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;}
-.server-card{background:var(--ink2);border:1px solid var(--border);padding:16px 20px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:space-between;}
-.server-card:hover{border-color:var(--accent);background:var(--ink3);}
-.server-card-left{display:flex;align-items:center;gap:14px;}
-.server-icon{font-size:24px;}
-.server-name{font-weight:700;font-size:15px;}
-.server-id{font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:3px;letter-spacing:1px;}
-.server-arrow{color:var(--text2);font-size:18px;}
-.splash-divider{display:flex;align-items:center;gap:12px;width:100%;max-width:440px;margin:16px 0;}
-.splash-divider-line{flex:1;height:1px;background:var(--border);}
-.splash-divider-text{font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:2px;}
-.create-server-btn{width:100%;max-width:440px;padding:14px;background:transparent;border:1px dashed var(--border);color:var(--text2);cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:2px;text-transform:uppercase;transition:all .15s;}
-.create-server-btn:hover{border-color:var(--accent);color:var(--accent);}
-.dev-access-link{width:100%;max-width:440px;padding:10px;background:transparent;border:none;color:var(--text2);cursor:pointer;font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;transition:all .15s;opacity:.6;}
-.dev-access-link:hover{color:var(--purple);opacity:1;}
-#modal-dev-code{position:fixed;inset:0;z-index:3100;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;}
-#modal-dev-code.open{display:flex;}
-#modal-dev-code .modal-box::before{background:var(--purple);}
-#modal-dev-code .modal-title{color:var(--purple);}
-.dev-code-error{color:var(--red);font-size:11px;min-height:16px;margin-top:6px;font-family:var(--mono);}
-#modal-new-pin{position:fixed;inset:0;z-index:3200;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;}
-#modal-new-pin.open{display:flex;}
-.new-pin-card{background:var(--ink2);border:1px solid var(--border);border-radius:10px;width:100%;max-width:380px;padding:26px 24px;text-align:center;position:relative;overflow:hidden;}
-.new-pin-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);}
-.new-pin-check{font-size:34px;margin-bottom:6px;}
-.new-pin-title{font-weight:700;font-size:15px;margin-bottom:2px;}
-.new-pin-sub{font-size:11px;color:var(--text2);margin-bottom:18px;}
-.new-pin-role{font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:8px;}
-.new-pin-code{font-family:var(--mono);font-size:34px;font-weight:700;letter-spacing:8px;color:var(--text);background:var(--ink3);border:1px dashed var(--border);border-radius:8px;padding:16px 10px;margin-bottom:16px;}
-.new-pin-warn{font-size:10px;color:var(--orange);margin-bottom:18px;}
-.new-pin-actions{display:flex;gap:10px;}
-.splash-empty{text-align:center;padding:30px;color:var(--text2);font-family:var(--mono);font-size:12px;}
-
-/* ===== CREATE SERVER MODAL ===== */
-#modal-create{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;}
-#modal-create.open{display:flex;}
-.modal-box{background:var(--ink2);border:1px solid var(--border);padding:36px;width:380px;position:relative;}
-.modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent);}
-.modal-title{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:2px;color:var(--accent);margin-bottom:24px;}
-.modal-form-group{margin-bottom:14px;}
-.modal-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin-bottom:5px;display:block;}
-.modal-input{width:100%;padding:11px 13px;background:var(--ink3);border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border-color .15s;}
-.modal-input:focus{border-color:var(--accent);}
-.modal-hint{font-size:11px;color:var(--text2);margin-top:4px;}
-.modal-actions{display:flex;gap:10px;margin-top:20px;}
-.modal-btn{flex:1;padding:12px;border:none;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .15s;}
-.modal-btn.primary{background:var(--accent);color:var(--ink);}
-.modal-btn.primary:hover{background:var(--accent2);}
-.modal-btn.secondary{background:var(--ink3);color:var(--text2);border:1px solid var(--border);}
-.modal-btn.secondary:hover{border-color:var(--text2);color:var(--text);}
 
 /* ===== LOGIN ===== */
 #screen-login{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;background:var(--ink);}
@@ -96,13 +37,18 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .pin-key.enter{background:var(--accent);color:var(--ink);font-weight:700;}
 .pin-key.enter:hover{background:var(--accent2);}
 .login-error{text-align:center;color:var(--red);font-size:11px;min-height:16px;margin-top:6px;font-family:var(--mono);}
-.login-back{display:block;text-align:center;margin-top:16px;font-size:11px;color:var(--text2);cursor:pointer;font-family:var(--mono);}
-.login-back:hover{color:var(--text);}
 
 /* ===== TOPBAR ===== */
 #topbar{display:none;position:sticky;top:0;z-index:100;background:var(--ink2);border-bottom:1px solid var(--border);padding:0 16px;height:54px;align-items:center;gap:2px;}
 #topbar.visible{display:flex;}
 .top-server-badge{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:2px;margin-right:10px;padding:4px 10px;border:1px solid rgba(232,197,71,.2);background:rgba(232,197,71,.06);flex-shrink:0;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.conn-status{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:1px;padding:4px 9px;border-radius:20px;margin-right:10px;flex-shrink:0;white-space:nowrap;transition:all .2s;}
+.conn-status.ok{color:var(--green);background:rgba(78,203,113,.08);border:1px solid rgba(78,203,113,.2);}
+.conn-status.down{color:var(--red);background:rgba(232,84,84,.1);border:1px solid rgba(232,84,84,.3);animation:connPulse 1.2s ease-in-out infinite;}
+.conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.conn-status.ok .conn-dot{box-shadow:0 0 0 2px rgba(78,203,113,.15);}
+.conn-status.down .conn-dot{box-shadow:0 0 0 2px rgba(232,84,84,.15);}
+@keyframes connPulse{0%,100%{opacity:1;}50%{opacity:.55;}}
 .nav-btn{background:transparent;border:none;color:var(--text2);padding:7px 10px;cursor:pointer;font-family:var(--sans);font-size:11px;font-weight:500;border-radius:6px;transition:all .15s;display:none;align-items:center;gap:4px;white-space:nowrap;}
 .nav-btn.visible{display:flex;}
 .nav-btn:hover{color:var(--text);background:var(--ink3);}
@@ -284,36 +230,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 .mode-toggle-btn.active-atomic{background:rgba(167,139,250,.2);color:var(--purple);}
 .mode-desc{font-size:11px;color:var(--text2);margin-top:9px;line-height:1.6;padding:11px;background:var(--ink3);border:1px solid var(--border);}
 
-/* DEV PANEL */
-.dev-card{background:var(--ink2);border:1px solid rgba(167,139,250,.15);padding:18px;margin-bottom:12px;}
-.dev-section-title{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--purple);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
-.dev-section-title::after{content:'';flex:1;height:1px;background:rgba(167,139,250,.2);}
-.dev-pin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px;margin-bottom:14px;}
-.dev-pin-card{background:var(--ink3);border:1px solid rgba(167,139,250,.15);padding:13px;display:flex;flex-direction:column;gap:7px;}
-.dev-pin-role{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--purple);text-transform:uppercase;}
-.dev-pin-code{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--text);letter-spacing:4px;min-height:26px;}
-.dev-pin-code.empty{color:var(--border);font-size:12px;letter-spacing:1px;}
-.dev-pin-status{font-size:9px;font-family:var(--mono);}
-.dev-pin-status.active{color:var(--green);}
-.dev-pin-status.none{color:var(--muted);}
-.dev-gen-btn{background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.25);color:var(--purple);padding:7px;cursor:pointer;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .15s;width:100%;}
-.dev-gen-btn:hover{background:rgba(167,139,250,.2);}
-.dev-revoke-btn{background:rgba(232,84,84,.08);border:1px solid rgba(232,84,84,.2);color:var(--red);padding:4px;cursor:pointer;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .15s;width:100%;}
-.dev-revoke-btn:hover{background:rgba(232,84,84,.15);}
-.dev-btn-row{display:flex;gap:9px;flex-wrap:wrap;}
-.dev-gen-all-btn{background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.3);color:var(--purple);padding:10px 18px;cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:all .15s;}
-.dev-gen-all-btn:hover{background:rgba(167,139,250,.25);}
-.dev-danger-btn{background:rgba(232,84,84,.08);border:1px solid rgba(232,84,84,.25);color:var(--red);padding:10px 18px;cursor:pointer;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:all .15s;}
-.dev-danger-btn:hover{background:rgba(232,84,84,.18);}
-
-/* DEV SERVER LIST */
-.dev-server-table{width:100%;border-collapse:collapse;}
-.dev-server-table th{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text2);text-transform:uppercase;padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);}
-.dev-server-table td{padding:10px 12px;border-bottom:1px solid var(--ink3);font-size:12px;vertical-align:middle;}
-.dev-server-table tr:last-child td{border-bottom:none;}
-.server-del-btn{background:none;border:1px solid rgba(232,84,84,.25);color:var(--red);padding:3px 8px;cursor:pointer;font-size:9px;font-family:var(--mono);transition:all .15s;}
-.server-del-btn:hover{background:rgba(232,84,84,.1);}
-
 /* LAPORAN */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-bottom:14px;}
 .stat-box{background:var(--ink2);border:1px solid var(--border);padding:16px;}
@@ -383,90 +299,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 </head>
 <body>
 
-<!-- ===== SPLASH: PILIH SERVER ===== -->
-<div id="screen-splash">
-  <div class="splash-logo">KAFE</div>
-  <div class="splash-sub">Multi Server POS</div>
-  <div class="splash-search">
-    <span class="splash-search-icon">🔍</span>
-    <input type="text" id="server-search" placeholder="Cari nama kafe..." oninput="filterServers(this.value)" autocomplete="off">
-  </div>
-  <div class="server-list" id="server-list">
-    <div class="splash-empty">Memuat daftar kafe...</div>
-  </div>
-  <div class="splash-divider">
-    <div class="splash-divider-line"></div>
-    <div class="splash-divider-text">ATAU</div>
-    <div class="splash-divider-line"></div>
-  </div>
-  <button class="create-server-btn" onclick="requestDevCode('create-server')">+ BUAT SERVER KAFE BARU</button>
-  <div class="splash-divider" style="margin-bottom:0;">
-    <div class="splash-divider-line"></div>
-  </div>
-  <button class="dev-access-link" onclick="requestDevCode('dev-panel')">🛠️ Developer</button>
-</div>
-
-<!-- ===== MODAL: KODE DEVELOPER ===== -->
-<div id="modal-dev-code">
-  <div class="modal-box">
-    <div class="modal-title" id="dev-code-modal-title">🔒 KODE DEVELOPER</div>
-    <div class="modal-form-group">
-      <label class="modal-label" id="dev-code-modal-label">Masukkan Kode</label>
-      <input class="modal-input" id="dev-code-input" type="password" inputmode="numeric" placeholder="••••••" maxlength="6" onkeydown="if(event.key==='Enter')submitDevCode()">
-      <div class="dev-code-error" id="dev-code-error"></div>
-    </div>
-    <div class="modal-actions">
-      <button class="modal-btn secondary" onclick="closeDevCodeModal()">Batal</button>
-      <button class="modal-btn primary" onclick="submitDevCode()">LANJUTKAN</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== MODAL: BUAT SERVER ===== -->
-<div id="modal-create">
-  <div class="modal-box">
-    <div class="modal-title">☕ BUAT SERVER KAFE BARU</div>
-    <div class="modal-form-group">
-      <label class="modal-label">Nama Kafe</label>
-      <input class="modal-input" id="create-name" type="text" placeholder="Kafe Santai" maxlength="40" oninput="onCreateNameInput()">
-    </div>
-    <div class="modal-form-group">
-      <label class="modal-label">ID Kafe (untuk link QR)</label>
-      <input class="modal-input" id="create-id" type="text" placeholder="kafe-santai" maxlength="30" style="font-family:var(--mono);" oninput="onCreateIdInput()">
-      <div class="modal-hint" id="create-id-status" style="min-height:15px;"></div>
-    </div>
-    <div class="modal-form-group">
-      <label class="modal-label">Deskripsi (opsional)</label>
-      <input class="modal-input" id="create-desc" type="text" placeholder="Kafe kopi & makanan ringan" maxlength="80">
-    </div>
-    <div class="modal-form-group">
-      <label class="modal-label">Ikon (emoji)</label>
-      <input class="modal-input" id="create-icon" type="text" placeholder="☕" maxlength="4" style="font-size:22px;text-align:center;">
-    </div>
-    <p class="modal-hint">ID dipakai di link QR pelanggan: <b>?cafe=ID&amp;meja=NOMOR</b>. Hanya huruf kecil, angka, dan tanda "-". PIN Owner akan langsung digenerate.</p>
-    <div class="modal-actions">
-      <button class="modal-btn secondary" onclick="closeCreateModal()">Batal</button>
-      <button class="modal-btn primary" onclick="createServer()">BUAT SEKARANG</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== MODAL: PIN OWNER SERVER BARU ===== -->
-<div id="modal-new-pin">
-  <div class="new-pin-card">
-    <div class="new-pin-check">✅</div>
-    <div class="new-pin-title" id="new-pin-server-name">Server berhasil dibuat!</div>
-    <div class="new-pin-sub">Catat PIN ini — dipakai untuk login pertama kali.</div>
-    <div class="new-pin-role">👑 PIN OWNER</div>
-    <div class="new-pin-code" id="new-pin-code">——————</div>
-    <div class="new-pin-warn">⚠️ PIN ini hanya ditampilkan sekali. Simpan baik-baik.</div>
-    <div class="new-pin-actions">
-      <button class="btn-secondary-modal" style="flex:1;padding:12px;background:transparent;border:1px solid var(--border);color:var(--text);border-radius:6px;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:1px;" onclick="salinPinBaru()">📋 SALIN</button>
-      <button class="modal-btn primary" style="flex:2;" onclick="lanjutKeServerBaru()">LANJUT →</button>
-    </div>
-  </div>
-</div>
-
 <!-- ===== LOGIN ===== -->
 <div id="screen-login">
   <div class="login-box">
@@ -483,13 +315,13 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       <button class="pin-key" onclick="clearPin()">⌫</button><button class="pin-key" onclick="addPin('0')">0</button><button class="pin-key enter" onclick="doLogin()">→</button>
     </div>
     <div class="login-error" id="login-error"></div>
-    <span class="login-back" onclick="goBackToSplash()">← Ganti server</span>
   </div>
 </div>
 
 <!-- ===== TOPBAR ===== -->
 <div id="topbar">
   <div class="top-server-badge" id="topbar-server-name">—</div>
+  <div class="conn-status ok" id="conn-status" title="Status koneksi"><span class="conn-dot"></span><span id="conn-status-text">Tersambung</span></div>
   <button class="nav-btn" id="nav-waiter"  onclick="switchView('waiter')">📦 Order</button>
   <button class="nav-btn" id="nav-dapur"   onclick="switchView('dapur')">👨‍🍳 Dapur</button>
   <button class="nav-btn" id="nav-antar"   onclick="switchView('antar')">🚚 Antar</button>
@@ -497,7 +329,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   <button class="nav-btn" id="nav-stok"    onclick="switchView('stok')">🏬 Gudang</button>
   <button class="nav-btn" id="nav-laporan" onclick="switchView('laporan')">📊 Laporan</button>
   <button class="nav-btn" id="nav-owner"   onclick="switchView('owner')">⚙️ Owner</button>
-  <button class="nav-btn" id="nav-dev"     onclick="switchView('dev')">🛠️ Dev</button>
   <div class="top-spacer"></div>
   <div class="mode-badge fifo" id="global-mode-badge">FIFO</div>
   <div class="role-badge" id="role-badge">—</div>
@@ -592,23 +423,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
 <div id="view-owner" class="view">
   <div class="page-header"><div class="page-title">⚙️ <span>Panel Owner</span></div></div>
   <div class="card">
-    <div class="card-title">🔗 ID Kafe &amp; Link QR</div>
-    <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;">ID ini dipakai di link QR pelanggan: <b>?cafe=ID&amp;meja=NOMOR</b>. Ganti ID kalau mau link/QR yang lebih rapi — tapi QR lama yang sudah dicetak otomatis <b>tidak berlaku lagi</b> setelah diganti.</p>
-    <div class="modal-form-group">
-      <label class="modal-label">ID Saat Ini</label>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <div id="owner-current-id" style="font-family:var(--mono);font-size:14px;color:var(--accent);background:var(--ink3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;flex:1;min-width:140px;">—</div>
-        <button class="mini-btn" onclick="salinLinkOwner()">Salin Link</button>
-      </div>
-    </div>
-    <div class="modal-form-group">
-      <label class="modal-label">ID Baru</label>
-      <input class="modal-input" id="owner-new-id" type="text" placeholder="kafe-santai" maxlength="30" style="font-family:var(--mono);" oninput="onOwnerIdInput()">
-      <div class="modal-hint" id="owner-id-status" style="min-height:15px;"></div>
-    </div>
-    <button class="reset-btn" id="owner-ganti-id-btn" onclick="gantiIdKafe()">GANTI ID KAFE</button>
-  </div>
-  <div class="card">
     <div class="card-title">🔑 PIN Karyawan (Sekali Pakai)</div>
     <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:4px;">PIN hangus setelah digunakan login. Generate baru tiap shift.</p>
     <div class="pin-mgmt-grid" id="pin-mgmt-grid"></div>
@@ -632,56 +446,6 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
       <button class="reset-btn" onclick="resetGudang()">RESET STOK</button>
       <button class="reset-btn" onclick="resetLaporan()">RESET LAPORAN</button>
       <button class="reset-btn" onclick="ownerResetOrders()">RESET ORDERS</button>
-    </div>
-  </div>
-</div>
-
-<!-- DEV PANEL -->
-<div id="view-dev" class="view">
-  <div class="page-header">
-    <div class="page-title">🛠️ <span>Developer Panel</span></div>
-    <div class="page-count">Global Access</div>
-  </div>
-  <div class="dev-card" style="background:rgba(167,139,250,.05);border-color:rgba(167,139,250,.2);">
-    <div style="font-size:11px;color:var(--text2);line-height:1.7;">
-      <b style="color:var(--purple);">Developer</b> punya akses lintas semua server. PIN Developer hardcode di kode. Owner dibuat via OTP dari sini. Untuk buat server baru, siapa pun butuh PIN sekali pakai yang di-generate developer di bawah — bukan lagi PIN Developer.
-    </div>
-  </div>
-
-  <div class="dev-card">
-    <div class="dev-section-title">🆕 PIN Buat Server Baru</div>
-    <p style="font-size:11px;color:var(--text2);margin-bottom:13px;">PIN sekali pakai supaya tidak ada yang iseng buat server kafe baru. Generate dulu di sini, lalu bagikan ke yang berhak — hangus otomatis setelah dipakai.</p>
-    <div id="create-server-pin-display" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px;">
-      <div class="dev-pin-code empty" id="create-server-pin-code" style="font-size:22px;">— — — —</div>
-      <div class="dev-pin-status none" id="create-server-pin-status">Belum ada PIN</div>
-    </div>
-    <div class="dev-btn-row">
-      <button class="dev-gen-all-btn" onclick="generateCreateServerPin()">⟳ GENERATE PIN</button>
-      <button class="dev-danger-btn" id="create-server-pin-revoke-btn" style="display:none;" onclick="revokeCreateServerPin()">✕ BATALKAN</button>
-    </div>
-  </div>
-
-  <div class="dev-card">
-    <div class="dev-section-title">🔑 Generate PIN — Server: <span id="dev-server-name-label" style="color:var(--accent);">—</span></div>
-    <p style="font-size:11px;color:var(--text2);margin-bottom:13px;">PIN sekali pakai untuk server yang sedang aktif. Owner juga di-generate dari sini.</p>
-    <div class="dev-pin-grid" id="dev-pin-grid"></div>
-    <div class="dev-btn-row">
-      <button class="dev-gen-all-btn" onclick="devGenerateAll()">⟳ GENERATE SEMUA</button>
-      <button class="dev-danger-btn" onclick="devRevokeAll()">✕ HAPUS SEMUA PIN</button>
-    </div>
-  </div>
-
-  <div class="dev-card">
-    <div class="dev-section-title">☕ Semua Server Terdaftar</div>
-    <div id="dev-servers-area"><div class="empty-state"><div class="empty-text">Memuat...</div></div></div>
-  </div>
-
-  <div class="dev-card">
-    <div class="dev-section-title">⚠️ Database Controls</div>
-    <div class="dev-btn-row">
-      <button class="dev-danger-btn" onclick="devDeleteServer()">🗑 HAPUS SERVER INI</button>
-      <button class="dev-danger-btn" onclick="devResetOrders()">RESET ORDERS</button>
-      <button class="dev-danger-btn" onclick="devResetAll()">⚠️ RESET SEMUA DATA SERVER</button>
     </div>
   </div>
 </div>
@@ -723,16 +487,9 @@ firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
 // ===== CONSTANTS =====
-// Developer PIN — hardcode, tidak di Firebase
-const DEV_PIN='181920'; // GANTI sesuai kebutuhan
+const KAFE_ID='78'; // ID Kafe paten — tidak bisa diganti dari aplikasi ini
 
 const STAFF_ROLES=[
-  {key:'waiter',label:'Waiter',icon:'📦'},
-  {key:'dapur', label:'Dapur', icon:'👨‍🍳'},
-  {key:'kasir', label:'Kasir', icon:'💵'},
-];
-const DEV_ROLES=[
-  {key:'owner', label:'Owner', icon:'👑'},
   {key:'waiter',label:'Waiter',icon:'📦'},
   {key:'dapur', label:'Dapur', icon:'👨‍🍳'},
   {key:'kasir', label:'Kasir', icon:'💵'},
@@ -741,16 +498,14 @@ const NAV_ACCESS={
   waiter:['waiter','antar'],
   dapur: ['dapur'],
   kasir: ['kasir','stok'],
-  owner: ['waiter','dapur','antar','kasir','stok','laporan','owner'],
-  dev:   ['dev']
+  owner: ['waiter','dapur','antar','kasir','stok','laporan','owner']
 };
-const FIRST_VIEW={waiter:'waiter',dapur:'dapur',kasir:'kasir',owner:'owner',dev:'dev'};
+const FIRST_VIEW={waiter:'waiter',dapur:'dapur',kasir:'kasir',owner:'owner'};
 const CHAT_CHANNELS={
   waiter:['umum','waiter-antar'],
   dapur: ['umum','dapur'],
   kasir: ['umum','kasir'],
-  owner: ['umum','waiter-antar','dapur','kasir'],
-  dev:   ['umum'],
+  owner: ['umum','waiter-antar','dapur','kasir']
 };
 const CHANNEL_LABELS={
   'umum':        {label:'# Umum',       color:'var(--accent)'},
@@ -764,15 +519,12 @@ const MODE_DESC={
 };
 
 // ===== STATE =====
-let currentServerId=null;      // ID Firebase server aktif
-let currentServerData=null;    // {name,desc,icon,...}
-let serverRef=null;            // db.ref('servers/'+currentServerId)
+let currentServerId=KAFE_ID;
+let currentServerData=null;
+let serverRef=db.ref(`servers/${KAFE_ID}`);
 let MASTER_MENU={},stokFIFO={},cart=[],otp_pins={};
-let createServerPins={}; // PIN sekali pakai global untuk membuat server baru (bukan per-server)
 let currentRole='',pinBuffer='';
 let stokMode='fifo';
-let allServers={};             // live snapshot servers
-// Chat state
 let currentChannel='umum',chatOpen=false,lastSeenTs={},chatUnread=0,chatListener=null;
 
 // ===== UTILS =====
@@ -780,6 +532,16 @@ function fRp(n){return (n||0).toLocaleString('id-ID');}
 function formatTimer(ms){let s=Math.floor(ms/1000),h=Math.floor(s/3600);s%=3600;let m=Math.floor(s/60);s%=60;return [h,m,s].map(v=>v<10?'0'+v:v).join(':');}
 function timerClass(ms){return ms<600000?'normal':ms<1200000?'warn':'late';}
 function totalStok(id){if(!stokFIFO[id])return 0;return Object.values(stokFIFO[id]).reduce((a,b)=>a+b.qty,0);}
+// Firebase Realtime Database menyimpan array sebagai object kalau index-nya tidak rapat
+// dari 0 (misal ada item yang dihapus di tengah), sehingga o.items bisa jadi OBJECT bukan
+// ARRAY saat dibaca balik. Kalau ada satu order dengan bentuk begini, o.items.map() akan
+// throw error dan menghentikan SELURUH proses render — bikin semua order (termasuk yang
+// baru) terlihat "tidak muncul" sampai order bermasalah itu dihapus. Fungsi ini menjamin
+// hasilnya selalu array yang aman untuk di-.map(), apapun bentuk aslinya di Firebase.
+function itemsArr(o){
+  if(!o||!o.items)return[];
+  return Array.isArray(o.items)?o.items:Object.values(o.items);
+}
 function stockBadgeClass(n){return n===0?'badge-out':n<=3?'badge-low':'badge-ok';}
 function showToast(msg,type='info'){
   const el=document.createElement('div');el.className=`toast ${type}`;
@@ -788,34 +550,20 @@ function showToast(msg,type='info'){
   setTimeout(()=>el.remove(),2900);
 }
 function randPin6(exclude=[]){
-  const avoid=new Set([DEV_PIN,...exclude]);
+  const avoid=new Set(exclude);
   let p;do{p=String(Math.floor(100000+Math.random()*900000));}while(avoid.has(p));
   return p;
 }
-function sref(path){return db.ref(`servers/${currentServerId}/${path}`);}
+function sref(path){return db.ref(`servers/${KAFE_ID}/${path}`);}
 function escapeHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function slugify(s){
-  return (s||'').toString().toLowerCase().trim()
-    .replace(/[^a-z0-9]+/g,'-')
-    .replace(/(^-+|-+$)/g,'')
-    .slice(0,30);
-}
 
-// ===== SESI TERSIMPAN (biar tidak perlu masukin PIN lagi tiap buka/tutup app) =====
-// Selama device ini belum "Keluar" manual, role & server terakhir diingat via localStorage.
+// ===== SESI & INISIALISASI =====
 const SESSION_KEY='kafe_pos_session_v1';
 function saveSession(){
-  try{
-    localStorage.setItem(SESSION_KEY,JSON.stringify({
-      serverId:currentServerId,
-      serverData:currentServerData,
-      role:currentRole,
-      ts:Date.now()
-    }));
-  }catch(e){/* localStorage tidak tersedia, abaikan */}
+  try{ localStorage.setItem(SESSION_KEY,JSON.stringify({role:currentRole, ts:Date.now()})); }catch(e){}
 }
 function clearSession(){
-  try{localStorage.removeItem(SESSION_KEY);}catch(e){}
+  try{ localStorage.removeItem(SESSION_KEY); }catch(e){}
 }
 function restoreSession(){
   let raw;
@@ -824,223 +572,39 @@ function restoreSession(){
   let data;
   try{data=JSON.parse(raw);}catch(e){clearSession();return false;}
   if(!data||!data.role){clearSession();return false;}
-  if(data.role!=='dev'&&!data.serverId){clearSession();return false;}
   currentRole=data.role;
-  currentServerId=data.serverId||null;
-  currentServerData=data.serverData||null;
-  if(currentServerId)serverRef=db.ref(`servers/${currentServerId}`);
   showApp(currentRole);
   return true;
 }
 
-// ===== LIVE SERVERS LISTENER (untuk splash) =====
-db.ref('servers').on('value',snap=>{
-  allServers=snap.val()||{};
-  renderServerList('');
-  renderDevServerList();
-});
-db.ref('create_server_pins').on('value',snap=>{
-  createServerPins=snap.val()||{};
-  renderCreateServerPinMgmt();
-});
-
-// ===== SPLASH =====
-function renderServerList(q){
-  const list=document.getElementById('server-list');
-  const entries=Object.entries(allServers).filter(([,v])=>
-    !q || v.name.toLowerCase().includes(q.toLowerCase())
-  );
-  if(!entries.length){
-    list.innerHTML=`<div class="splash-empty">${q?'Kafe tidak ditemukan':'Belum ada server kafe. Buat yang pertama!'}</div>`;
-    return;
-  }
-  list.innerHTML=entries.map(([id,v])=>`
-    <div class="server-card" onclick="selectServer('${id}')">
-      <div class="server-card-left">
-        <div class="server-icon">${v.icon||'☕'}</div>
-        <div>
-          <div class="server-name">${v.name}</div>
-          <div class="server-id">${v.desc||'Kafe POS System'} · #${id}</div>
-        </div>
-      </div>
-      <div class="server-arrow">›</div>
-    </div>`).join('');
-}
-function filterServers(q){renderServerList(q);}
-
-function selectServer(id){
-  currentServerId=id;
-  currentServerData=allServers[id];
-  serverRef=db.ref(`servers/${id}`);
-  // Show login screen
-  document.getElementById('screen-splash').style.display='none';
-  const ls=document.getElementById('screen-login');
-  ls.classList.add('open');
-  document.getElementById('login-cafe-name').textContent=(currentServerData.icon||'☕')+' '+currentServerData.name;
-  document.getElementById('login-server-sub').textContent='Masukkan PIN Anda · #'+id;
-  pinBuffer='';updatePinDots();
-  document.getElementById('login-error').textContent='';
-}
-
-// ===== GERBANG KODE DEVELOPER (untuk buat server baru & akses panel dev) =====
-let pendingDevAction=null;
-function requestDevCode(action){
-  pendingDevAction=action;
-  document.getElementById('dev-code-input').value='';
-  document.getElementById('dev-code-error').textContent='';
-  if(action==='create-server'){
-    document.getElementById('dev-code-modal-title').textContent='☕ PIN BUAT SERVER';
-    document.getElementById('dev-code-modal-label').textContent='Masukkan PIN dari Developer';
+// Inisialisasi Aplikasi Saat Halaman Dimuat
+window.onload=async function(){
+  // Cek apakah server 78 sudah ada di database, jika belum buat otomatis
+  const snap=await serverRef.once('value');
+  if(!snap.exists()){
+    const defaultOwnerPin='123456'; // Default awal, bisa dihapus/diganti via Owner Panel nanti
+    await serverRef.set({
+      name:"Kafe 78",
+      icon:"☕",
+      createdAt:Date.now(),
+      settings:{stok_mode:'fifo'}
+    });
+    await serverRef.child('otp_pins').push({role:'owner',pin:defaultOwnerPin,status:'active',createdAt:Date.now()});
+    currentServerData={name:"Kafe 78",icon:"☕"};
   }else{
-    document.getElementById('dev-code-modal-title').textContent='🔒 KODE DEVELOPER';
-    document.getElementById('dev-code-modal-label').textContent='Masukkan Kode';
-  }
-  document.getElementById('modal-dev-code').classList.add('open');
-  setTimeout(()=>document.getElementById('dev-code-input').focus(),80);
-}
-function closeDevCodeModal(){
-  document.getElementById('modal-dev-code').classList.remove('open');
-  pendingDevAction=null;
-}
-async function submitDevCode(){
-  const val=document.getElementById('dev-code-input').value.trim();
-  const action=pendingDevAction;
-
-  if(action==='create-server'){
-    // Validasi terhadap PIN sekali pakai yang di-generate developer (bukan DEV_PIN lagi)
-    const match=Object.entries(createServerPins).find(([,d])=>d.status==='active'&&d.pin===val);
-    if(!match){
-      document.getElementById('dev-code-error').textContent='PIN salah atau sudah dipakai! Minta developer generate PIN baru.';
-      document.getElementById('dev-code-input').value='';
-      document.getElementById('dev-code-input').focus();
-      return;
-    }
-    // Konsumsi PIN — sekali pakai, langsung hangus
-    await db.ref('create_server_pins/'+match[0]).remove();
-    closeDevCodeModal();
-    openCreateModal();
-    return;
+    currentServerData=snap.val();
   }
 
-  // action === 'dev-panel' tetap pakai DEV_PIN hardcode
-  if(val!==DEV_PIN){
-    document.getElementById('dev-code-error').textContent='Kode developer salah!';
-    document.getElementById('dev-code-input').value='';
-    document.getElementById('dev-code-input').focus();
-    return;
+  if(!restoreSession()){
+    showLogin();
   }
-  closeDevCodeModal();
-  currentRole='dev';currentServerId=null;currentServerData=null;
-  showApp('dev');saveSession();
-}
-function devCodeKeydown(e){if(e.key==='Enter')submitDevCode();}
+};
 
-let createIdTouched=false;   // true kalau user sudah edit manual field ID
-let createIdCheckToken=0;    // token buat menghindari race condition saat cek ketersediaan
-
-function openCreateModal(){
-  createIdTouched=false;
-  document.getElementById('create-id-status').textContent='';
-  document.getElementById('create-id-status').style.color='';
-  document.getElementById('modal-create').classList.add('open');
-  document.getElementById('create-name').focus();
-}
-function closeCreateModal(){document.getElementById('modal-create').classList.remove('open');}
-
-function onCreateNameInput(){
-  if(createIdTouched)return; // jangan timpa kalau ID sudah diedit manual
-  const idInput=document.getElementById('create-id');
-  idInput.value=slugify(document.getElementById('create-name').value);
-  validateCreateId(idInput.value);
-}
-function onCreateIdInput(){
-  createIdTouched=true;
-  const idInput=document.getElementById('create-id');
-  const cleaned=slugify(idInput.value);
-  if(cleaned!==idInput.value)idInput.value=cleaned;
-  validateCreateId(cleaned);
-}
-async function validateCreateId(id){
-  const statusEl=document.getElementById('create-id-status');
-  const myToken=++createIdCheckToken;
-  if(!id){
-    statusEl.textContent='';statusEl.style.color='';
-    return;
-  }
-  if(id.length<3){
-    statusEl.textContent='ID minimal 3 karakter.';statusEl.style.color='var(--red)';
-    return;
-  }
-  statusEl.textContent='Mengecek ketersediaan...';statusEl.style.color='';
-  try{
-    const snap=await db.ref('servers/'+id).once('value');
-    if(myToken!==createIdCheckToken)return; // ada input baru setelah ini, abaikan hasil lama
-    if(snap.exists()){
-      statusEl.textContent='✕ ID sudah dipakai kafe lain, coba yang lain.';
-      statusEl.style.color='var(--red)';
-    }else{
-      statusEl.textContent='✓ ID tersedia.';
-      statusEl.style.color='var(--green)';
-    }
-  }catch(e){
-    if(myToken!==createIdCheckToken)return;
-    statusEl.textContent='Gagal mengecek ID, coba lagi.';
-    statusEl.style.color='var(--red)';
-  }
-}
-
-async function createServer(){
-  const name=document.getElementById('create-name').value.trim();
-  const desc=document.getElementById('create-desc').value.trim();
-  const icon=document.getElementById('create-icon').value.trim()||'☕';
-  const id=slugify(document.getElementById('create-id').value);
-  if(!name){showToast('Isi nama kafe!','error');return;}
-  if(!id||id.length<3){showToast('ID kafe minimal 3 karakter (huruf/angka/-)!','error');return;}
-
-  const idSnap=await db.ref('servers/'+id).once('value');
-  if(idSnap.exists()){
-    showToast('ID kafe sudah dipakai, ganti yang lain!','error');
-    document.getElementById('create-id-status').textContent='✕ ID sudah dipakai kafe lain, coba yang lain.';
-    document.getElementById('create-id-status').style.color='var(--red)';
-    return;
-  }
-
-  await db.ref('servers/'+id).set({
-    name,desc,icon,createdAt:Date.now(),
-    settings:{stok_mode:'fifo'}
-  });
-  const ref=db.ref('servers/'+id);
-  // Langsung buatkan PIN Owner untuk server baru ini — sama seperti generate PIN role di panel dev
-  const ownerPin=randPin6();
-  await ref.child('otp_pins').push({role:'owner',pin:ownerPin,status:'active',createdAt:Date.now(),createdBy:'dev'});
-  closeCreateModal();
-  document.getElementById('create-name').value='';
-  document.getElementById('create-id').value='';
-  document.getElementById('create-desc').value='';
-  document.getElementById('create-icon').value='';
-  pendingNewServer={id:ref.key,name,icon};
-  document.getElementById('new-pin-server-name').textContent=`${icon} ${name} berhasil dibuat!`;
-  document.getElementById('new-pin-code').textContent=ownerPin;
-  document.getElementById('modal-new-pin').classList.add('open');
-}
-let pendingNewServer=null;
-function salinPinBaru(){
-  const pin=document.getElementById('new-pin-code').textContent;
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(pin).then(()=>showToast('PIN disalin!','success')).catch(()=>showToast('Gagal menyalin, catat manual ya','error'));
-  }else{showToast('Salin manual: '+pin,'info');}
-}
-function lanjutKeServerBaru(){
-  document.getElementById('modal-new-pin').classList.remove('open');
-  if(pendingNewServer)selectServer(pendingNewServer.id);
-  pendingNewServer=null;
-}
-
-function goBackToSplash(){
-  document.getElementById('screen-login').classList.remove('open');
-  document.getElementById('screen-splash').style.display='flex';
-  currentServerId=null;currentServerData=null;serverRef=null;
-  pinBuffer='';
+function showLogin(){
+  document.getElementById('screen-login').classList.add('open');
+  document.getElementById('login-cafe-name').textContent=(currentServerData?.icon||'☕')+' '+(currentServerData?.name||'Kafe 78');
+  document.getElementById('login-server-sub').textContent='Masukkan PIN Anda';
+  pinBuffer='';updatePinDots();document.getElementById('login-error').textContent='';
 }
 
 // ===== PIN INPUT =====
@@ -1083,58 +647,74 @@ let _listeners=[];
 function trackListener(ref,event,cb){ref.on(event,cb);_listeners.push(()=>ref.off(event,cb));}
 function offAllListeners(){_listeners.forEach(fn=>fn&&fn());_listeners=[];}
 
+// ===== MONITOR KONEKSI FIREBASE =====
+// Realtime Database kadang membuat koneksi WebSocket jadi "diam" (stale) setelah HP/tab
+// idle lama atau WiFi sempat putus-nyambung — listener .on('value') tidak lagi menerima
+// update baru walau datanya sudah masuk ke server. .info/connected adalah path resmi
+// Firebase yang selalu akurat menunjukkan status socket saat ini; begitu ia kembali ke
+// true, listener data di-attach ulang dari nol supaya menarik data terbaru secara paksa.
+let _wasConnected=true;
+let _connMonitorStarted=false;
+function startConnectionMonitor(){
+  if(_connMonitorStarted)return;
+  _connMonitorStarted=true;
+  db.ref('.info/connected').on('value',snap=>{
+    const connected=snap.val()===true;
+    updateConnStatusUI(connected);
+    if(!connected){
+      _wasConnected=false;
+    }else if(!_wasConnected){
+      // Baru pulih dari terputus: tarik ulang semua data secara paksa
+      _wasConnected=true;
+      if(currentRole){
+        attachServerScopedListeners();
+        showToast('Koneksi pulih — data disinkronkan ulang','success');
+      }
+    }
+  });
+}
+function updateConnStatusUI(connected){
+  const el=document.getElementById('conn-status');
+  const txt=document.getElementById('conn-status-text');
+  if(!el)return;
+  el.classList.toggle('ok',connected);
+  el.classList.toggle('down',!connected);
+  txt.textContent=connected?'Tersambung':'Terputus...';
+  if(!connected)showToast('Koneksi terputus, mencoba menyambung ulang...','error');
+}
+
 function showApp(role){
   document.getElementById('screen-login').classList.remove('open');
-  document.getElementById('screen-splash').style.display='none';
   const tb=document.getElementById('topbar');tb.classList.add('visible');
-  document.getElementById('role-badge').textContent=role==='dev'?'DEV':role.toUpperCase();
-  document.getElementById('role-badge').style.cssText=role==='dev'
-    ?'background:rgba(167,139,250,.15);color:var(--purple);':'';
-  const serverName=currentServerData?currentServerData.name:'—';
+  document.getElementById('role-badge').textContent=role.toUpperCase();
+  document.getElementById('role-badge').style.cssText='';
+  const serverName=currentServerData?currentServerData.name:'Kafe 78';
   document.getElementById('topbar-server-name').textContent=
     (currentServerData?.icon||'☕')+' '+(serverName.length>14?serverName.slice(0,14)+'…':serverName);
   document.getElementById('chat-server-label').textContent=serverName;
 
   const allowed=NAV_ACCESS[role];
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('visible',allowed.includes(b.id.replace('nav-',''))));
-  document.querySelectorAll('.owner-section').forEach(e=>e.style.display=(role==='owner'||role==='dev')?'block':'none');
+  document.querySelectorAll('.owner-section').forEach(e=>e.style.display=(role==='owner')?'block':'none');
   document.getElementById('chat-bubble').classList.add('visible');
 
   // Attach Firebase listeners scoped to server
   attachServerScopedListeners();
-  if(role==='dev'){
-    document.getElementById('dev-server-name-label').textContent=currentServerData?.name||'— (pilih server di bawah)';
-    renderDevServerList();
-  }
+  startConnectionMonitor();
   switchView(FIRST_VIEW[role]);
-  renderOwnerIdCard();
   showToast(`Selamat datang, ${role}!`,'success');
 }
 
-// Listener data yang scoped ke satu server (dipakai saat login staff/owner, maupun saat dev memilih server untuk dikelola)
+// Listener data yang scoped ke server (ID 78, paten)
 function attachServerScopedListeners(){
   offAllListeners();
-  if(!currentServerId)return;
   trackListener(sref('master_menu'),'value',snap=>{MASTER_MENU=snap.val()||{};renderMenu();renderDropdown();renderStokList();});
   trackListener(sref('stok_fifo'),'value',snap=>{stokFIFO=snap.val()||{};renderMenu();renderStokList();});
-  trackListener(sref('orders'),'value',snap=>{const o=[];snap.forEach(c=>o.push({key:c.key,...c.val()}));o.sort((a,b)=>a.ts-b.ts);renderOrders(o);});
+  trackListener(sref('orders'),'value',snap=>{const o=[];snap.forEach(c=>{o.push({key:c.key,...c.val()});});o.sort((a,b)=>a.ts-b.ts);renderOrders(o);});
   trackListener(sref('laporan'),'value',renderLaporan);
-  trackListener(sref('otp_pins'),'value',snap=>{otp_pins=snap.val()||{};renderPinMgmt();renderDevPins();});
+  trackListener(sref('otp_pins'),'value',snap=>{otp_pins=snap.val()||{};renderPinMgmt();});
   trackListener(sref('settings/stok_mode'),'value',snap=>{stokMode=snap.val()||'fifo';updateModeBadge();});
   initChat(currentRole);
-}
-
-// Dev memilih server mana yang mau dikelola (generate PIN, lihat orders/laporan, dsb) tanpa perlu login ulang
-function devKelolaServer(id){
-  currentServerId=id;currentServerData=allServers[id];
-  const nm=currentServerData?.name||'—';
-  document.getElementById('dev-server-name-label').textContent=nm;
-  document.getElementById('topbar-server-name').textContent=(currentServerData?.icon||'☕')+' '+(nm.length>14?nm.slice(0,14)+'…':nm);
-  document.getElementById('chat-server-label').textContent=nm;
-  attachServerScopedListeners();
-  saveSession();
-  renderOwnerIdCard();
-  showToast(`Sekarang mengelola: ${nm}`,'success');
 }
 
 function switchView(v){
@@ -1152,8 +732,8 @@ function signOut(){
   document.getElementById('chat-bubble').classList.remove('visible');
   document.getElementById('topbar').querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('visible'));
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
-  // Back to splash
-  goBackToSplash();
+
+  showLogin(); // Langsung tampilkan login
 }
 
 // ===== STOK MODE =====
@@ -1188,218 +768,6 @@ async function generatePin(role){
   showToast(`PIN ${role}: ${pin}`,'success');
 }
 async function revokePin(key){await sref(`otp_pins/${key}`).remove();showToast('PIN dibatalkan','info');}
-
-// ===== PIN BUAT SERVER BARU (global, bukan per-server) =====
-function renderCreateServerPinMgmt(){
-  const codeEl=document.getElementById('create-server-pin-code');
-  const statusEl=document.getElementById('create-server-pin-status');
-  const revokeBtn=document.getElementById('create-server-pin-revoke-btn');
-  if(!codeEl)return;
-  const active=Object.entries(createServerPins).find(([,d])=>d.status==='active');
-  if(active){
-    codeEl.textContent=active[1].pin;codeEl.classList.remove('empty');
-    statusEl.textContent='● AKTIF — belum dipakai';statusEl.classList.remove('none');statusEl.classList.add('active');
-    revokeBtn.style.display='';
-  }else{
-    codeEl.textContent='— — — —';codeEl.classList.add('empty');
-    statusEl.textContent='Belum ada PIN';statusEl.classList.add('none');statusEl.classList.remove('active');
-    revokeBtn.style.display='none';
-  }
-}
-async function generateCreateServerPin(){
-  const ex=Object.entries(createServerPins).filter(([,d])=>d.status==='active');
-  for(const[k]of ex)await db.ref('create_server_pins/'+k).remove();
-  const pin=randPin6();
-  await db.ref('create_server_pins').push({pin,status:'active',createdAt:Date.now()});
-  showToast(`PIN Buat Server: ${pin}`,'success');
-}
-async function revokeCreateServerPin(){
-  const ex=Object.entries(createServerPins).filter(([,d])=>d.status==='active');
-  for(const[k]of ex)await db.ref('create_server_pins/'+k).remove();
-  showToast('PIN Buat Server dibatalkan','info');
-}
-
-// ===== PIN MANAGEMENT (Dev) =====
-function renderDevPins(){
-  const el=document.getElementById('dev-pin-grid');if(!el)return;
-  el.innerHTML=DEV_ROLES.map(r=>{
-    const active=Object.entries(otp_pins).find(([,d])=>d.role===r.key&&d.status==='active');
-    const pinKey=active?active[0]:null,pinData=active?active[1]:null;
-    const disp=pinData
-      ?`<div class="dev-pin-code">${pinData.pin}</div><div class="dev-pin-status active">● AKTIF</div>`
-      :`<div class="dev-pin-code empty">— — — —</div><div class="dev-pin-status none">Belum ada PIN</div>`;
-    const rev=pinData?`<button class="dev-revoke-btn" onclick="devRevokePin('${pinKey}')">✕ BATALKAN</button>`:'';
-    return `<div class="dev-pin-card"><div class="dev-pin-icon">${r.icon}</div><div class="dev-pin-role">${r.label}</div>${disp}<button class="dev-gen-btn" onclick="devGeneratePin('${r.key}')">⟳ GENERATE</button>${rev}</div>`;
-  }).join('');
-}
-async function devGeneratePin(role){
-  const used=Object.values(otp_pins).filter(d=>d.status==='active').map(d=>d.pin);
-  const ex=Object.entries(otp_pins).filter(([,d])=>d.role===role&&d.status==='active');
-  for(const[k]of ex)await sref(`otp_pins/${k}`).remove();
-  const pin=randPin6(used);
-  await sref('otp_pins').push({role,pin,status:'active',createdAt:Date.now(),createdBy:'dev'});
-  showToast(`PIN ${role}: ${pin}`,'success');
-}
-async function devGenerateAll(){
-  if(!confirm('Generate PIN untuk semua role sekaligus?'))return;
-  const used=[];
-  for(const r of DEV_ROLES){
-    const ex=Object.entries(otp_pins).filter(([,d])=>d.role===r.key&&d.status==='active');
-    for(const[k]of ex)await sref(`otp_pins/${k}`).remove();
-    const pin=randPin6(used);used.push(pin);
-    await sref('otp_pins').push({role:r.key,pin,status:'active',createdAt:Date.now(),createdBy:'dev'});
-  }
-  showToast('Semua PIN berhasil digenerate!','success');
-}
-async function devRevokePin(key){await sref(`otp_pins/${key}`).remove();showToast('PIN dibatalkan','info');}
-async function devRevokeAll(){
-  if(!confirm('Batalkan SEMUA PIN aktif?'))return;
-  const act=Object.entries(otp_pins).filter(([,d])=>d.status==='active');
-  for(const[k]of act)await sref(`otp_pins/${k}`).remove();
-  showToast('Semua PIN dihapus','info');
-}
-
-// Dev server list
-function renderDevServerList(){
-  const el=document.getElementById('dev-servers-area');if(!el)return;
-  const entries=Object.entries(allServers);
-  if(!entries.length){el.innerHTML='<div class="empty-state"><div class="empty-text">Belum ada server</div></div>';return;}
-  el.innerHTML=`<table class="dev-server-table">
-    <tr><th>Kafe</th><th>ID</th><th>Dibuat</th><th>Aksi</th></tr>
-    ${entries.map(([id,v])=>`<tr${id===currentServerId?' style="background:rgba(167,139,250,.08);"':''}>
-      <td><b>${v.icon||'☕'} ${v.name}</b>${id===currentServerId?' <span style="color:var(--purple);font-size:9px;font-family:var(--mono);">● AKTIF</span>':''}<br><span style="color:var(--text2);font-size:10px;">${v.desc||''}</span></td>
-      <td style="font-family:var(--mono);font-size:10px;">#${id}</td>
-      <td style="font-size:10px;color:var(--text2);">${v.createdAt?new Date(v.createdAt).toLocaleDateString('id-ID'):'-'}</td>
-      <td style="display:flex;gap:6px;flex-wrap:wrap;"><button class="mini-btn" onclick="devKelolaServer('${id}')">Kelola</button><button class="mini-btn" onclick="salinLinkServer('${id}')">Salin Link</button><button class="server-del-btn" onclick="devDeleteServerById('${id}','${v.name}')">Hapus</button></td>
-    </tr>`).join('')}
-  </table>`;
-}
-function salinLinkServer(id){
-  const params=`?cafe=${id}&meja=1`;
-  const text=params;
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text)
-      .then(()=>showToast('Parameter link disalin: '+text+' (ganti angka meja sesuai nomor meja, tempel setelah URL halaman pesan pelanggan)','success'))
-      .catch(()=>showToast('Gagal menyalin, catat manual: '+text,'error'));
-  }else{
-    showToast('Salin manual: '+text,'info');
-  }
-}
-
-// ===== OWNER: LIHAT & GANTI ID KAFE =====
-let ownerIdCheckToken=0;
-function renderOwnerIdCard(){
-  const idEl=document.getElementById('owner-current-id');
-  if(!idEl)return; // view belum ada di DOM (misal saat role dev sebelum pilih server)
-  idEl.textContent=currentServerId||'—';
-  const input=document.getElementById('owner-new-id');
-  if(input)input.value='';
-  const status=document.getElementById('owner-id-status');
-  if(status){status.textContent='';status.style.color='';}
-}
-function salinLinkOwner(){
-  if(!currentServerId){showToast('Belum ada server aktif','error');return;}
-  salinLinkServer(currentServerId);
-}
-function onOwnerIdInput(){
-  const input=document.getElementById('owner-new-id');
-  const cleaned=slugify(input.value);
-  if(cleaned!==input.value)input.value=cleaned;
-  validateOwnerId(cleaned);
-}
-async function validateOwnerId(id){
-  const statusEl=document.getElementById('owner-id-status');
-  const myToken=++ownerIdCheckToken;
-  if(!id){statusEl.textContent='';statusEl.style.color='';return;}
-  if(id.length<3){
-    statusEl.textContent='ID minimal 3 karakter.';statusEl.style.color='var(--red)';
-    return;
-  }
-  if(id===currentServerId){
-    statusEl.textContent='Itu ID yang sedang dipakai.';statusEl.style.color='var(--text2)';
-    return;
-  }
-  statusEl.textContent='Mengecek ketersediaan...';statusEl.style.color='';
-  try{
-    const snap=await db.ref('servers/'+id).once('value');
-    if(myToken!==ownerIdCheckToken)return;
-    if(snap.exists()){
-      statusEl.textContent='✕ ID sudah dipakai kafe lain, coba yang lain.';
-      statusEl.style.color='var(--red)';
-    }else{
-      statusEl.textContent='✓ ID tersedia.';
-      statusEl.style.color='var(--green)';
-    }
-  }catch(e){
-    if(myToken!==ownerIdCheckToken)return;
-    statusEl.textContent='Gagal mengecek ID, coba lagi.';
-    statusEl.style.color='var(--red)';
-  }
-}
-async function gantiIdKafe(){
-  if(!currentServerId){showToast('Belum ada server aktif','error');return;}
-  const newId=slugify(document.getElementById('owner-new-id').value);
-  if(!newId||newId.length<3){showToast('ID baru minimal 3 karakter (huruf/angka/-)!','error');return;}
-  if(newId===currentServerId){showToast('Itu ID yang sedang dipakai sekarang.','info');return;}
-
-  const snap=await db.ref('servers/'+newId).once('value');
-  if(snap.exists()){
-    showToast('ID sudah dipakai kafe lain, ganti yang lain!','error');
-    return;
-  }
-  if(!confirm(`Ganti ID kafe dari "${currentServerId}" ke "${newId}"?\n\nSemua QR/link yang sudah dicetak dengan ID lama TIDAK AKAN BERFUNGSI LAGI. Pastikan cetak ulang QR setelah ini.`))return;
-
-  const btn=document.getElementById('owner-ganti-id-btn');
-  const oldId=currentServerId;
-  btn.disabled=true;btn.textContent='MEMPROSES...';
-  try{
-    const dataSnap=await db.ref('servers/'+oldId).once('value');
-    const data=dataSnap.val();
-    if(!data)throw new Error('Data server lama tidak ditemukan');
-
-    await db.ref('servers/'+newId).set(data);   // salin seluruh data (menu, stok, orders, laporan, pin, dll) ke ID baru
-    await db.ref('servers/'+oldId).remove();     // hapus data lama
-
-    currentServerId=newId;
-    currentServerData=data;
-    serverRef=db.ref('servers/'+newId);
-    saveSession();
-    offAllListeners();
-    attachServerScopedListeners();
-    renderOwnerIdCard();
-    renderDevServerList();
-
-    const nm=data.name||'—';
-    document.getElementById('topbar-server-name').textContent=(data.icon||'☕')+' '+(nm.length>14?nm.slice(0,14)+'…':nm);
-    document.getElementById('chat-server-label').textContent=nm;
-    if(currentRole==='dev')document.getElementById('dev-server-name-label').textContent=nm;
-
-    showToast(`ID kafe berhasil diganti ke "${newId}"! Cetak ulang QR ya.`,'success');
-  }catch(e){
-    showToast('Gagal ganti ID: '+(e.message||e),'error');
-  }finally{
-    btn.disabled=false;btn.textContent='GANTI ID KAFE';
-  }
-}
-
-async function devDeleteServerById(id,name){
-  if(!confirm(`Hapus server "${name}" beserta SEMUA datanya?`))return;
-  if(!confirm('Yakin? Data tidak bisa dikembalikan!'))return;
-  await db.ref(`servers/${id}`).remove();
-  showToast(`Server "${name}" dihapus`,'info');
-  if(id===currentServerId)signOut();
-}
-async function devDeleteServer(){
-  if(!currentServerId){showToast('Pilih server dulu','error');return;}
-  devDeleteServerById(currentServerId,currentServerData?.name||'server ini');
-}
-async function devResetOrders(){if(!confirm('Hapus semua pesanan aktif?'))return;await sref('orders').remove();showToast('Orders dihapus','info');}
-async function devResetAll(){
-  if(!confirm('RESET SEMUA DATA server ini?'))return;
-  if(!confirm('Yakin benar-benar?'))return;
-  await Promise.all(['orders','laporan','stok_fifo','chat','otp_pins'].map(p=>sref(p).remove()));
-  showToast('Semua data direset','info');
-}
 
 // ===== MENU =====
 function renderMenu(){
@@ -1458,17 +826,17 @@ async function kirimFIFO(meja){
   const snap=await sref('stok_fifo').once('value');const cur=snap.val()||{};
   for(const item of cart){let a=0;if(cur[item.id])Object.values(cur[item.id]).forEach(b=>a+=b.qty);if(a<item.qty)throw new Error(`Stok "${item.n}" tidak cukup! Sisa ${a}`);}
   for(const item of cart)await deductFIFO(item.id,item.qty);
-  await sref('orders').push({meja,items:cart,status:'masak',ts:Date.now(),total:cart.reduce((a,b)=>a+b.h*b.qty,0)});
+  await sref('orders').push({meja,items:cart.map(i=>({id:i.id,n:i.n,h:i.h,qty:i.qty})),status:'masak',ts:Date.now(),total:cart.reduce((a,b)=>a+b.h*b.qty,0)});
 }
 async function kirimAtomic(meja){
   const snap=await sref('stok_fifo').once('value');const cur=snap.val()||{};
   for(const item of cart){let a=0;if(cur[item.id])Object.values(cur[item.id]).forEach(b=>a+=b.qty);if(a<item.qty)throw new Error(`Stok "${item.n}" tidak cukup! Sisa ${a}`);}
   for(const item of cart)await deductAtomic(item.id,item.qty);
-  await sref('orders').push({meja,items:cart,status:'masak',ts:Date.now(),total:cart.reduce((a,b)=>a+b.h*b.qty,0)});
+  await sref('orders').push({meja,items:cart.map(i=>({id:i.id,n:i.n,h:i.h,qty:i.qty})),status:'masak',ts:Date.now(),total:cart.reduce((a,b)=>a+b.h*b.qty,0)});
 }
 async function deductFIFO(itemId,jumlah){
   const ref=sref(`stok_fifo/${itemId}`);const snap=await ref.once('value');
-  const batches=[];snap.forEach(c=>batches.push({key:c.key,...c.val()}));batches.sort((a,b)=>a.ts-b.ts);
+  const batches=[];snap.forEach(c=>{batches.push({key:c.key,...c.val()});});batches.sort((a,b)=>a.ts-b.ts);
   let needed=jumlah;const updates={};
   for(const b of batches){if(needed<=0)break;if(b.qty<=needed){updates[b.key]=null;needed-=b.qty;}else{updates[b.key]={qty:b.qty-needed,ts:b.ts};needed=0;}}
   if(needed>0)throw new Error('Stok tidak cukup');await ref.update(updates);
@@ -1499,27 +867,43 @@ function renderOrders(orders){
   const now=Date.now();
   function buildCard(o,act){
     const diff=now-o.ts;
-    const items=o.items.map(i=>`<div class="order-item-row"><span>${i.n}</span><span class="order-item-qty">×${i.qty}</span></div>`).join('');
+    const items=itemsArr(o).map(i=>`<div class="order-item-row"><span>${i.n}</span><span class="order-item-qty">×${i.qty}</span></div>`).join('');
     const onlineBadge=o.sudah_bayar?`<div style="display:inline-block;background:rgba(78,203,113,.15);color:var(--green);border:1px solid rgba(78,203,113,.3);font-family:var(--mono);font-size:9px;letter-spacing:1px;padding:3px 8px;border-radius:4px;margin-bottom:8px;">🌐 ONLINE · LUNAS${o.metode_bayar?' · '+o.metode_bayar.toUpperCase():''}</div>`:'';
     return `<div class="order-card ${o.status}" data-ts="${o.ts}"><div class="order-card-top"><div class="order-table"><small>MEJA</small>${o.meja}</div><div class="timer ${timerClass(diff)} live-timer" data-ts="${o.ts}">${formatTimer(diff)}</div></div>${onlineBadge}<div class="order-items">${items}</div>${act}</div>`;
   }
+  // buildCardSafe: satu order dengan data korup (mis. field items/ts rusak) TIDAK BOLEH
+  // menjatuhkan seluruh render — kalau dibiarkan .map() lempar exception di tengah jalan,
+  // seluruh sisa pesanan (termasuk yang baru) ikut hilang dari tampilan sampai order
+  // bermasalah itu dihapus. Jadi setiap kartu dibangun dalam try/catch masing-masing.
+  function buildCardSafe(o,act){
+    try{return buildCard(o,act);}
+    catch(e){
+      console.error('Gagal render order',o?.key,e);
+      return `<div class="order-card" style="border-color:var(--red);"><div class="order-card-top"><div class="order-table"><small>MEJA</small>${o?.meja||'?'}</div></div><div style="color:var(--red);font-size:11px;font-family:var(--mono);padding:6px 0;">⚠️ Data pesanan ini rusak/tidak terbaca.</div>${act||''}</div>`;
+    }
+  }
   const dEl=document.getElementById('dapur-container');
-  dEl.innerHTML=by.masak.length?by.masak.map(o=>buildCard(o,`<button class="action-btn masak-btn" onclick="updateStatus('${o.key}','antar',this)">SIAP SAJI ✓</button>`)).join(''):'<div class="empty-state"><div class="empty-icon">✨</div><div class="empty-text">Semua pesanan selesai</div></div>';
+  dEl.innerHTML=by.masak.length?by.masak.map(o=>buildCardSafe(o,`<button class="action-btn masak-btn" onclick="updateStatus('${o.key}','antar',this)">SIAP SAJI ✓</button>`)).join(''):'<div class="empty-state"><div class="empty-icon">✨</div><div class="empty-text">Semua pesanan selesai</div></div>';
   document.getElementById('dapur-count').textContent=by.masak.length+' pesanan';
   const aEl=document.getElementById('antar-container');
   aEl.innerHTML=by.antar.length?by.antar.map(o=>{
     const act=o.sudah_bayar
       ?`<button class="action-btn antar-btn" style="background:var(--green);" onclick="selesaikanOnline('${o.key}',this)">✓ SELESAI (Sudah Bayar Online)</button>`
       :`<button class="action-btn antar-btn" onclick="updateStatus('${o.key}','kasir',this)">SUDAH DIANTAR ✓</button>`;
-    return buildCard(o,act);
+    return buildCardSafe(o,act);
   }).join(''):'<div class="empty-state"><div class="empty-icon">✨</div><div class="empty-text">Tidak ada yang perlu diantar</div></div>';
   document.getElementById('antar-count').textContent=by.antar.length+' pesanan';
   const kEl=document.getElementById('kasir-container');
   if(by.kasir.length){
     kEl.innerHTML=by.kasir.map(o=>{
-      const diff2=now-o.ts;
-      const items=o.items.map(i=>`<div class="order-item-row"><span>${i.n}</span><span class="order-item-qty">×${i.qty}</span></div>`).join('');
-      return `<div class="order-card kasir" data-ts="${o.ts}"><div class="order-card-top"><div class="order-table"><small>MEJA</small>${o.meja}</div><div class="timer ${timerClass(diff2)} live-timer" data-ts="${o.ts}">${formatTimer(diff2)}</div></div><div class="order-items">${items}</div><div class="cash-section"><div class="total-row"><div class="total-label">TOTAL</div><div class="total-amount">Rp ${fRp(o.total)}</div></div><div class="cash-input-wrap"><span>Rp</span><input class="cash-input" id="cash-${o.key}" type="number" placeholder="Uang tunai" oninput="hitungKembalian('${o.key}',${o.total})"></div><div class="change-display"><span style="font-size:9px;color:var(--text2);font-family:var(--mono);">KEMBALIAN</span><span class="change-val" id="change-${o.key}">—</span></div><button class="pay-btn" id="pay-btn-${o.key}" onclick="bayarDanCetak('${o.key}',${o.total})" disabled>BAYAR & CETAK STRUK</button></div></div>`;
+      try{
+        const diff2=now-o.ts;
+        const items=itemsArr(o).map(i=>`<div class="order-item-row"><span>${i.n}</span><span class="order-item-qty">×${i.qty}</span></div>`).join('');
+        return `<div class="order-card kasir" data-ts="${o.ts}"><div class="order-card-top"><div class="order-table"><small>MEJA</small>${o.meja}</div><div class="timer ${timerClass(diff2)} live-timer" data-ts="${o.ts}">${formatTimer(diff2)}</div></div><div class="order-items">${items}</div><div class="cash-section"><div class="total-row"><div class="total-label">TOTAL</div><div class="total-amount">Rp ${fRp(o.total)}</div></div><div class="cash-input-wrap"><span>Rp</span><input class="cash-input" id="cash-${o.key}" type="number" placeholder="Uang tunai" oninput="hitungKembalian('${o.key}',${o.total})"></div><div class="change-display"><span style="font-size:9px;color:var(--text2);font-family:var(--mono);">KEMBALIAN</span><span class="change-val" id="change-${o.key}">—</span></div><button class="pay-btn" id="pay-btn-${o.key}" onclick="bayarDanCetak('${o.key}',${o.total})" disabled>BAYAR & CETAK STRUK</button></div></div>`;
+      }catch(e){
+        console.error('Gagal render order kasir',o?.key,e);
+        return `<div class="order-card kasir" style="border-color:var(--red);"><div class="order-card-top"><div class="order-table"><small>MEJA</small>${o?.meja||'?'}</div></div><div style="color:var(--red);font-size:11px;font-family:var(--mono);padding:6px 0;">⚠️ Data pesanan ini rusak/tidak terbaca.</div></div>`;
+      }
     }).join('');
   }else{kEl.innerHTML='<div class="empty-state"><div class="empty-icon">✨</div><div class="empty-text">Tidak ada yang perlu dibayar</div></div>';}
   document.getElementById('kasir-count').textContent=by.kasir.length+' pesanan';
@@ -1544,7 +928,7 @@ async function bayarDanCetak(key,total){
   try{
     const snap=await sref('orders/'+key).once('value');const o=snap.val();if(!o){showToast('Pesanan tidak ditemukan','error');return;}
     const w=new Date().toLocaleString('id-ID');
-    document.getElementById('print-area').innerHTML=`<div style="width:280px;padding:20px;font-family:'Space Mono',monospace;background:white;color:black;"><div style="text-align:center;font-size:18px;font-weight:700;letter-spacing:4px;margin-bottom:2px;">${currentServerData?.icon||'☕'} ${currentServerData?.name||'KAFE'}</div><div style="text-align:center;font-size:9px;color:#666;margin-bottom:14px;">${w}</div><div style="border-top:1px dashed #ccc;border-bottom:1px dashed #ccc;padding:9px 0;margin-bottom:9px;">${o.items.map(i=>`<div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>${i.n} ×${i.qty}</span><span>Rp ${fRp(i.h*i.qty)}</span></div>`).join('')}</div><div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>Subtotal</span><span>Rp ${fRp(o.total)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>Tunai</span><span>Rp ${fRp(cash)}</span></div><div style="display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin:8px 0 0;border-top:1px solid #000;padding-top:8px;"><span>KEMBALI</span><span>Rp ${fRp(change)}</span></div><div style="text-align:center;font-size:9px;color:#666;margin-top:14px;border-top:1px dashed #ccc;padding-top:10px;">Terima kasih sudah mampir! ☕</div></div>`;
+    document.getElementById('print-area').innerHTML=`<div style="width:280px;padding:20px;font-family:'Space Mono',monospace;background:white;color:black;"><div style="text-align:center;font-size:18px;font-weight:700;letter-spacing:4px;margin-bottom:2px;">${currentServerData?.icon||'☕'} ${currentServerData?.name||'KAFE'}</div><div style="text-align:center;font-size:9px;color:#666;margin-bottom:14px;">${w}</div><div style="border-top:1px dashed #ccc;border-bottom:1px dashed #ccc;padding:9px 0;margin-bottom:9px;">${itemsArr(o).map(i=>`<div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>${i.n} ×${i.qty}</span><span>Rp ${fRp(i.h*i.qty)}</span></div>`).join('')}</div><div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>Subtotal</span><span>Rp ${fRp(o.total)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>Tunai</span><span>Rp ${fRp(cash)}</span></div><div style="display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin:8px 0 0;border-top:1px solid #000;padding-top:8px;"><span>KEMBALI</span><span>Rp ${fRp(change)}</span></div><div style="text-align:center;font-size:9px;color:#666;margin-top:14px;border-top:1px dashed #ccc;padding-top:10px;">Terima kasih sudah mampir! ☕</div></div>`;
     setTimeout(async()=>{
       await sref('laporan').push({...o,tgl:w,cash,change});
       await sref('orders/'+key).remove();
@@ -1560,7 +944,7 @@ async function selesaikanOnline(key,btnEl){
   try{
     const snap=await sref('orders/'+key).once('value');const o=snap.val();if(!o){showToast('Pesanan tidak ditemukan','error');if(btnEl)btnEl.disabled=false;return;}
     const w=new Date().toLocaleString('id-ID');
-    document.getElementById('print-area').innerHTML=`<div style="width:280px;padding:20px;font-family:'Space Mono',monospace;background:white;color:black;"><div style="text-align:center;font-size:18px;font-weight:700;letter-spacing:4px;margin-bottom:2px;">${currentServerData?.icon||'☕'} ${currentServerData?.name||'KAFE'}</div><div style="text-align:center;font-size:9px;color:#666;margin-bottom:14px;">${w}</div><div style="border-top:1px dashed #ccc;border-bottom:1px dashed #ccc;padding:9px 0;margin-bottom:9px;">${o.items.map(i=>`<div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>${i.n} ×${i.qty}</span><span>Rp ${fRp(i.h*i.qty)}</span></div>`).join('')}</div><div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>Subtotal</span><span>Rp ${fRp(o.total)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>Metode</span><span>${o.metode_bayar||'Online'}</span></div><div style="display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin:8px 0 0;border-top:1px solid #000;padding-top:8px;"><span>STATUS</span><span>LUNAS ✓</span></div><div style="text-align:center;font-size:9px;color:#666;margin-top:14px;border-top:1px dashed #ccc;padding-top:10px;">Terima kasih sudah mampir! ☕</div></div>`;
+    document.getElementById('print-area').innerHTML=`<div style="width:280px;padding:20px;font-family:'Space Mono',monospace;background:white;color:black;"><div style="text-align:center;font-size:18px;font-weight:700;letter-spacing:4px;margin-bottom:2px;">${currentServerData?.icon||'☕'} ${currentServerData?.name||'KAFE'}</div><div style="text-align:center;font-size:9px;color:#666;margin-bottom:14px;">${w}</div><div style="border-top:1px dashed #ccc;border-bottom:1px dashed #ccc;padding:9px 0;margin-bottom:9px;">${itemsArr(o).map(i=>`<div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>${i.n} ×${i.qty}</span><span>Rp ${fRp(i.h*i.qty)}</span></div>`).join('')}</div><div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>Subtotal</span><span>Rp ${fRp(o.total)}</span></div><div style="display:flex;justify-content:space-between;font-size:11px;margin:3px 0;"><span>Metode</span><span>${o.metode_bayar||'Online'}</span></div><div style="display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin:8px 0 0;border-top:1px solid #000;padding-top:8px;"><span>STATUS</span><span>LUNAS ✓</span></div><div style="text-align:center;font-size:9px;color:#666;margin-top:14px;border-top:1px dashed #ccc;padding-top:10px;">Terima kasih sudah mampir! ☕</div></div>`;
     setTimeout(async()=>{
       await sref('laporan').push({...o,tgl:w,cash:o.total,change:0});
       await sref('orders/'+key).remove();
@@ -1573,7 +957,7 @@ async function selesaikanOnline(key,btnEl){
 // ===== LAPORAN =====
 function renderLaporan(snap){
   let total=0,count=0;const rows=[];
-  snap.forEach(c=>rows.push(c.val()));rows.reverse();rows.forEach(r=>{total+=r.total;count++;});
+  snap.forEach(c=>{rows.push(c.val());});rows.reverse();rows.forEach(r=>{total+=r.total;count++;});
   const h=rows.map(r=>`<div class="laporan-item"><div><div class="lap-meja">Meja ${r.meja}</div><div class="lap-time">${r.tgl}</div></div><div class="lap-total">Rp ${fRp(r.total)}</div></div>`).join('');
   document.getElementById('lap-omzet').textContent='Rp '+fRp(total);
   document.getElementById('lap-count').textContent=count;
@@ -1612,7 +996,7 @@ async function hapusBatchSeluruh(itemId,batchKey,qty){if(!confirm(`Hapus batch (
 function renderDropdown(){let h='';Object.keys(MASTER_MENU).forEach(id=>h+=`<option value="${id}">${MASTER_MENU[id].n}</option>`);document.getElementById('stok-item-select').innerHTML=h||'<option>— belum ada menu —</option>';}
 async function tambahStokBatch(){const id=document.getElementById('stok-item-select').value,q=parseInt(document.getElementById('stok-qty-input').value);if(!id||!q||q<=0){showToast('Pilih menu dan isi jumlah','error');return;}await sref('stok_fifo/'+id).push({qty:q,ts:Date.now()});document.getElementById('stok-qty-input').value='';showToast(`+${q} stok ditambahkan`,'success');}
 async function kurangiStokManual(){const id=document.getElementById('stok-item-select').value,qty=parseInt(document.getElementById('stok-qty-input').value);if(!id||!qty||qty<=0){showToast('Pilih menu dan isi jumlah','error');return;}const total=totalStok(id);if(qty>total){showToast(`Stok hanya tersisa ${total}!`,'error');return;}if(!confirm(`Hapus ${qty} stok dari ${MASTER_MENU[id].n}?`))return;try{await deductFIFO(id,qty);document.getElementById('stok-qty-input').value='';showToast(`−${qty} stok dihapus`,'info');}catch(e){showToast(e.message,'error');}}
-async function hapusSatuPersatu(id){const ref=sref(`stok_fifo/${id}`),snap=await ref.once('value');const b=[];snap.forEach(c=>b.push({key:c.key,...c.val()}));b.sort((a,b)=>a.ts-b.ts);if(!b.length){showToast('Stok sudah kosong!','error');return;}const f=b[0];if(f.qty>1)await ref.child(f.key).update({qty:f.qty-1});else await ref.child(f.key).remove();}
+async function hapusSatuPersatu(id){const ref=sref(`stok_fifo/${id}`),snap=await ref.once('value');const b=[];snap.forEach(c=>{b.push({key:c.key,...c.val()});});b.sort((a,b)=>a.ts-b.ts);if(!b.length){showToast('Stok sudah kosong!','error');return;}const f=b[0];if(f.qty>1)await ref.child(f.key).update({qty:f.qty-1});else await ref.child(f.key).remove();}
 function tambahMasterMenu(){const n=document.getElementById('new-menu-name').value.trim(),h=parseInt(document.getElementById('new-menu-price').value);if(!n||!h||h<=0){showToast('Isi nama dan harga menu!','error');return;}sref('master_menu').push({n,h}).then(()=>{document.getElementById('new-menu-name').value='';document.getElementById('new-menu-price').value='';showToast(`Menu "${n}" didaftarkan!`,'success');});}
 function hapusMenu(id){if(!confirm(`Hapus menu "${MASTER_MENU[id].n}"?`))return;sref('master_menu/'+id).remove();sref('stok_fifo/'+id).remove();showToast('Menu dihapus','info');}
 function resetGudang(){if(!confirm('Reset semua stok?'))return;sref('stok_fifo').remove().then(()=>showToast('Stok direset','info'));}
@@ -1684,6 +1068,78 @@ function updateDevChatMonitor(allMsgs){
   el.scrollTop=el.scrollHeight;
 }
 async function clearAllChat(){if(!confirm('Hapus semua chat?'))return;await sref('chat').remove();showToast('Chat dihapus','info');}
+
+// ===== ORDERS: FIX RENDERING MULTIPLE ITEMS =====
+let _ordersRef = null;
+let _ordersAttachedServer = null;
+
+function renderOrderHtml(id, o){
+  const table = o.meja || o.table || o.tableNo || o.table_no || '—';
+  const created = o.createdAt || o.created || o.ts || o.timestamp || 0;
+  const itemsRaw = o.items || o.cart || o.order || [];
+  const itemsArr = Array.isArray(itemsRaw) ? itemsRaw : Object.values(itemsRaw||{});
+  const itemsHtml = itemsArr.map(it=>{
+    const name = it.name || it.nama || it.title || it.item || 'Item';
+    const qty = it.qty || it.quantity || it.jml || 1;
+    return `<div class="order-item-row"><div>${escapeHtml(String(name))}</div><div class="order-item-qty">${escapeHtml(String(qty))}</div></div>`;
+  }).join('');
+  const age = created ? formatTimer(Date.now() - created) : '--:--:--';
+  return `<div class="order-card" id="order-${escapeHtml(id)}">
+    <div class="order-card-top">
+      <div class="order-table">${escapeHtml(String(table))}</div>
+      <div class="timer ${timerClass(Date.now()-created)}">${escapeHtml(age)}</div>
+    </div>
+    <div class="order-items">${itemsHtml}</div>
+  </div>`;
+}
+
+function attachOrdersValueListenerForServer(serverId){
+  if(!serverId) return;
+  // detach previous
+  if(_ordersRef){
+    try{ _ordersRef.off(); }catch(e){/*ignore*/}
+    _ordersRef = null;
+    _ordersAttachedServer = null;
+  }
+  _ordersRef = db.ref(`servers/${serverId}/orders`);
+  _ordersRef.on('value', snap=>{
+    const data = snap.val() || {};
+    const entries = Object.entries(data);
+    const dapurContainer = document.getElementById('dapur-container');
+    const antarContainer = document.getElementById('antar-container');
+    const kasirContainer = document.getElementById('kasir-container');
+    const dapurList = [], antarList = [], kasirList = [];
+
+    entries.forEach(([id, o])=>{
+      const status = ((o && (o.status || o.stage || o.to || o.type)) || '').toString().toLowerCase();
+      const html = renderOrderHtml(id, o);
+      if(status.includes('antar') || status.includes('delivery') || status.includes('antar-kirim')) {
+        antarList.push(html);
+      } else if(status.includes('kasir') || status.includes('checkout') || status.includes('paid')) {
+        kasirList.push(html);
+      } else {
+        dapurList.push(html);
+      }
+    });
+
+    dapurContainer.innerHTML = dapurList.length ? dapurList.join('') : `<div class="empty-state"><div class="empty-text">Belum ada pesanan</div></div>`;
+    antarContainer.innerHTML  = antarList.length  ? antarList.join('')  : `<div class="empty-state"><div class="empty-text">Belum ada pesanan</div></div>`;
+    kasirContainer.innerHTML  = kasirList.length  ? kasirList.join('')  : `<div class="empty-state"><div class="empty-text">Belum ada pesanan</div></div>`;
+
+    // update counters if elements exist
+    const dc = document.getElementById('dapur-count'); if(dc) dc.textContent = `${dapurList.length} pesanan`;
+    const ac = document.getElementById('antar-count'); if(ac) ac.textContent = `${antarList.length} pesanan`;
+    const kc = document.getElementById('kasir-count'); if(kc) kc.textContent = `${kasirList.length} pesanan`;
+  });
+  _ordersAttachedServer = serverId;
+}
+
+// poll to attach listener once server is selected (safe when selectServer sets currentServerId)
+setInterval(()=>{
+  if(currentServerId && _ordersAttachedServer !== currentServerId){
+    attachOrdersValueListenerForServer(currentServerId);
+  }
+}, 700);
 
 // ===== LIVE TIMER =====
 setInterval(()=>{
