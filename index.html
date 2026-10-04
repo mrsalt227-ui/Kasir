@@ -989,6 +989,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   .stok-item-left{gap:7px;flex-wrap:wrap;}
   .batch-header-row,.batch-row{grid-template-columns:24px 1fr 56px 66px 62px;font-size:9px;}
 }
+
+/* ===== AUTH / PROVISIONING (STEP 2) ===== */
+#screen-unprovisioned{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;background:#000;padding:24px;}
+#screen-unprovisioned.open{display:flex;}
+.prov-box{background:#f5f5f7;border-radius:12px;padding:16px;margin-bottom:14px;}
+.prov-step{font-size:13px;line-height:1.7;color:var(--muted);margin:0 0 10px;}
+.prov-step b{color:var(--ink);font-weight:600;}
+.prov-uid{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--ink);background:#f5f5f7;border:1px solid var(--border);border-radius:10px;padding:13px;margin:0 0 6px;word-break:break-all;text-align:center;letter-spacing:.5px;}
+.prov-list-row{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:9px 0;border-bottom:1px solid var(--border);}
+.prov-list-row:last-child{border-bottom:none;}
 </style>
 
 </head>
@@ -1011,6 +1021,23 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
       <button class="pin-key" onclick="clearPin()">⌫</button><button class="pin-key" onclick="addPin('0')">0</button><button class="pin-key enter" onclick="doLogin()">Masuk</button>
     </div>
     <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ===== BELUM DIPROVISION (STEP 2) =====
+     Layar ini BUKAN redesign: memakai kelas .login-box / .login-logo / .pin-key
+     yang sama persis dengan keypad PIN, hanya isi teksnya yang berbeda. -->
+<div id="screen-unprovisioned">
+  <div class="login-box">
+    <div class="login-logo" id="unprov-title">KAFE 78</div>
+    <div class="login-server-name" id="unprov-sub">Device belum diprovision</div>
+    <div class="prov-box">
+      <p class="prov-step">Sampaikan <b>UID device</b> di bawah kepada Owner. Owner akan mendaftarkan UID ini beserta role-nya. Role dibaca dari database — bukan dari device ini.</p>
+      <div class="prov-uid" id="unprov-uid">—</div>
+      <button class="pin-key enter" style="width:100%;" onclick="copyUid()">Salin UID</button>
+    </div>
+    <div class="login-error" id="unprov-msg"></div>
+    <button class="pin-key" style="width:100%;margin-top:12px;" onclick="bootAuth()">Cek ulang</button>
   </div>
 </div>
 
@@ -1123,9 +1150,26 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 <div id="view-owner" class="view">
   <div class="page-header"><div class="page-title"><span>Panel Owner</span></div></div>
   <div class="card">
-    <div class="card-title">PIN Karyawan (Sekali Pakai)</div>
-    <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:4px;">PIN hangus setelah digunakan login. Generate baru tiap shift.</p>
+    <div class="card-title">PIN Device (UI Lock)</div>
+    <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:4px;">PIN hanya mengunci tampilan di device tersebut — bukan penentu role atau hak akses. Role selalu dibaca dari database.</p>
     <div class="pin-mgmt-grid" id="pin-mgmt-grid"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Device &amp; Role Staff</div>
+    <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:4px;">Role dibaca dari database berdasarkan UID device (Firebase Auth). Hapus device = cabut akses pada UID tersebut.</p>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;">
+      <input class="form-input" id="staff-uid-input" type="text" placeholder="Tempel UID device" style="flex:2;min-width:180px;">
+      <input class="form-input" id="staff-name-input" type="text" placeholder="Nama staff" style="flex:1;min-width:130px;">
+      <select class="form-select" id="staff-role-select" style="flex:0 0 130px;">
+        <option value="waiter">Waiter</option>
+        <option value="dapur">Dapur</option>
+        <option value="antar">Antar</option>
+        <option value="kasir">Kasir</option>
+        <option value="owner">Owner</option>
+      </select>
+      <button class="act-btn add" onclick="provisionStaff()" style="flex:0 0 auto;">+ PROVISION</button>
+    </div>
+    <div id="staff-list-area" style="margin-top:13px;"><div class="fifo-info">Memuat daftar device...</div></div>
   </div>
   <div class="card">
     <div class="card-title">Mode Pengurangan Stok</div>
@@ -1172,6 +1216,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <button id="scroll-top-btn" type="button" aria-label="Kembali ke atas" title="Kembali ke atas">↑</button>
 <div id="shortcut-hint">Alt+1 Order · Alt+2 Dapur · Alt+3 Antar · Alt+4 Kasir</div>
 <script>
@@ -1187,6 +1232,11 @@ const firebaseConfig={
 };
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
+// Auth = identitas device. Dipakai hanya untuk mendapatkan UID (anonymous sign-in).
+// Role TIDAK berasal dari Firebase Auth — auth tidak tahu apa pun tentang role.
+// Role dibaca dari staff/{uid} di database.
+const auth=firebase.auth();
+auth.onAuthStateChanged(user=>{ if(user) currentUid=user.uid; });
 
 // ===== CONSTANTS =====
 const KAFE_ID='78'; // ID Kafe paten — tidak bisa diganti dari aplikasi ini
@@ -1194,18 +1244,22 @@ const KAFE_ID='78'; // ID Kafe paten — tidak bisa diganti dari aplikasi ini
 const STAFF_ROLES=[
   {key:'waiter',label:'Waiter',icon:'📦'},
   {key:'dapur', label:'Dapur', icon:'👨‍🍳'},
+  {key:'antar', label:'Antar', icon:'🛵'},
   {key:'kasir', label:'Kasir', icon:'💵'},
 ];
 const NAV_ACCESS={
   waiter:['waiter','antar'],
   dapur: ['dapur'],
+  antar: ['antar'],
   kasir: ['kasir','stok'],
   owner: ['waiter','dapur','antar','kasir','stok','laporan','owner']
 };
-const FIRST_VIEW={waiter:'waiter',dapur:'dapur',kasir:'kasir',owner:'owner'};
+const FIRST_VIEW={waiter:'waiter',dapur:'dapur',antar:'antar',kasir:'kasir',owner:'owner'};
+const ALL_ROLES=['waiter','dapur','antar','kasir','owner'];
 const CHAT_CHANNELS={
   waiter:['umum','waiter-antar'],
   dapur: ['umum','dapur'],
+  antar: ['umum','waiter-antar'],
   kasir: ['umum','kasir'],
   owner: ['umum','waiter-antar','dapur','kasir']
 };
@@ -1226,8 +1280,13 @@ let currentServerData=null;
 let serverRef=db.ref(`servers/${KAFE_ID}`);
 let MASTER_MENU={},stokFIFO={},cart=[],otp_pins={};
 let currentRole='',pinBuffer='';
+// currentUid = identitas device dari Firebase Anonymous Auth. Ini satu-satunya
+// sumber kebenaran role (lewat staff/{uid}). Role TIDAK pernah diambil dari
+// localStorage, PIN, URL, atau variabel JS yang bisa diubah user.
+let currentUid='';
 let stokMode='fifo';
 let currentChannel='umum',chatOpen=false,lastSeenTs={},chatUnread=0,chatListener=null;
+let currentView='';
 
 // ===== UTILS =====
 function fRp(n){return (n||0).toLocaleString('id-ID');}
@@ -1259,50 +1318,144 @@ function randPin6(exclude=[]){
 function sref(path){return db.ref(`servers/${KAFE_ID}/${path}`);}
 function escapeHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-// ===== SESI & INISIALISASI =====
-const SESSION_KEY='kafe_pos_session_v1';
+// ===== IDENTITAS DEVICE (FIREBASE AUTH) =====
+// Alur otentikasi (Step 2):
+//   1) Firebase Anonymous Sign-In -> UID device
+//   2) UID dibaca ulang dari staff/{uid} di database
+//   3) staff/{uid}.active harus true, lalu role = staff/{uid}.role
+//   4) bila tidak ada / tidak aktif -> layar "Device belum diprovision"
+//
+// PIN keypad yang ada HANYA diperlakukan sebagai "local UI lock" (kemudahan
+// membuka aplikasi di perangkat ini). PIN tidak memberi role, tidak membuka
+// hak akses, dan tidak dibaca dari database sebagai sumber kebenaran.
+const SESSION_KEY='kafe_pos_session_v1'; // format LAMA — dibersihkan, tidak lagi dipakai
+const DEVICE_KEY='kafe_pos_device_v2';   // format BARU — hanya {uid,lastView}
+
 function saveSession(){
-  try{ localStorage.setItem(SESSION_KEY,JSON.stringify({role:currentRole, ts:Date.now()})); }catch(e){}
+  // Hanya informasi UX. TIDAK PERNAH menyimpan role/owner/authenticated.
+  try{ localStorage.setItem(DEVICE_KEY,JSON.stringify({uid:currentUid,lastView:currentView||''})); }catch(e){}
 }
 function clearSession(){
-  try{ localStorage.removeItem(SESSION_KEY); }catch(e){}
+  try{ localStorage.removeItem(DEVICE_KEY); }catch(e){}
+  try{ localStorage.removeItem(SESSION_KEY); }catch(e){} // buang sisa role lokal versi lama
 }
-function restoreSession(){
-  let raw;
-  try{raw=localStorage.getItem(SESSION_KEY);}catch(e){return false;}
-  if(!raw)return false;
-  let data;
-  try{data=JSON.parse(raw);}catch(e){clearSession();return false;}
-  if(!data||!data.role){clearSession();return false;}
-  currentRole=data.role;
-  showApp(currentRole);
-  return true;
+function readDeviceSession(){
+  try{
+    const raw=localStorage.getItem(DEVICE_KEY);
+    const d=raw?JSON.parse(raw):null;
+    return (d&&d.uid)?d:null;
+  }catch(e){ return null; }
+}
+
+// Sign-in anonymous: idempoten. Firebase mengembalikan UID yang sama selama
+// sesi auth masih hidup, jadi reload tidak membuat UID baru.
+async function ensureAuthUid(){
+  if(auth.currentUser) return auth.currentUser.uid;
+  const cred=await auth.signInAnonymously();
+  return cred.user.uid;
+}
+
+// Penyelesaian role. Satu-satunya sumber: staff/{uid}.
+async function resolveRoleFromDb(uid){
+  if(!uid) return {ok:false,reason:'none'};
+  let rec=null;
+  try{ rec=(await db.ref(`staff/${uid}`).once('value')).val(); }catch(e){}
+  if(!rec) return {ok:false,reason:'missing'};
+  if(rec.active!==true) return {ok:false,reason:'inactive'};
+  if(!ALL_ROLES.includes(rec.role)) return {ok:false,reason:'badrole'};
+  return {ok:true,role:rec.role,name:rec.name||'',uid};
+}
+
+function requireRole(roles){
+  const list=Array.isArray(roles)?roles:[roles];
+  if(currentRole&&list.includes(currentRole)) return true;
+  showToast('Akses tidak diizinkan untuk role ini','error');
+  return false;
+}
+
+function showUnprovisionedScreen(reason){
+  hideAppUi();
+  const box=document.getElementById('screen-unprovisioned');
+  if(box) box.classList.add('open');
+  const uidEl=document.getElementById('unprov-uid');
+  if(uidEl) uidEl.textContent=currentUid||'—';
+  const msg=document.getElementById('unprov-msg');
+  const sub=document.getElementById('unprov-sub');
+  if(msg) msg.textContent =
+    reason==='missing' ? 'UID ini belum terdaftar. Minta Owner untuk memprovision device ini.'
+    : reason==='inactive' ? 'Device ini dinonaktifkan oleh Owner.'
+    : reason==='badrole' ? 'Role device belum dikonfigurasi Owner.'
+    : 'Gagal memuat data staff. Periksa koneksi.';
+  if(sub) sub.textContent=(currentServerData?.name||'Kafe 78');
+}
+function copyUid(){
+  if(!currentUid) return;
+  try{
+    navigator.clipboard?.writeText(currentUid)
+      .then(()=>showToast('UID device disalin','success'))
+      .catch(()=>showToast('Gagal menyalin','error'));
+  }catch(e){}
+}
+function hideAppUi(){
+  document.getElementById('topbar')?.classList.remove('visible');
+  document.getElementById('chat-bubble')?.classList.remove('visible');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('visible'));
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.owner-section').forEach(e=>e.style.display='none');
 }
 
 // Inisialisasi Aplikasi Saat Halaman Dimuat
 window.onload=async function(){
-  // Cek apakah server 78 sudah ada di database, jika belum buat otomatis
   const snap=await serverRef.once('value');
   if(!snap.exists()){
-    const defaultOwnerPin='123456'; // Default awal, bisa dihapus/diganti via Owner Panel nanti
-    await serverRef.set({
-      name:"Kafe 78",
-      icon:"☕",
-      createdAt:Date.now(),
-      settings:{stok_mode:'fifo'}
-    });
-    await serverRef.child('otp_pins').push({role:'owner',pin:defaultOwnerPin,status:'active',createdAt:Date.now()});
+    // Catatan: TIDAK ada default owner PIN lagi. Owner pertama harus
+    // diprovision secara eksplisit (lihat layar "Belum diprovision").
+    await serverRef.set({name:"Kafe 78",icon:"☕",createdAt:Date.now(),settings:{stok_mode:'fifo'}});
     currentServerData={name:"Kafe 78",icon:"☕"};
   }else{
     currentServerData=snap.val();
   }
-
-  if(!restoreSession()){
-    showLogin();
-  }
+  await bootAuth();
 };
 
+// Boot: auth -> staff/{uid} -> app / layar unprovisioned
+async function bootAuth(){
+  try{
+    showBootScreen('Menyambungkan ke Firebase…');
+    currentUid=await ensureAuthUid();
+    saveSession();
+    const r=await resolveRoleFromDb(currentUid);
+    if(!r.ok){ currentRole=''; showUnprovisionedScreen(r.reason); return; }
+    currentRole=r.role;
+    const session=readDeviceSession();
+    // Sesi perangkat ini: buka langsung tanpa PIN lagi (role tetap dari DB).
+    if(session&&session.uid===currentUid){
+      document.getElementById('screen-unprovisioned')?.classList.remove('open');
+      showApp(r.role);
+      return;
+    }
+    showLogin();
+  }catch(e){
+    console.error('Boot auth gagal:',e);
+    currentRole='';
+    showUnprovisionedScreen('error');
+  }
+}
+function showBootScreen(msg){
+  document.getElementById('screen-login')?.classList.remove('open');
+  const box=document.getElementById('screen-unprovisioned');
+  if(!box) return;
+  box.classList.add('open');
+  const uidEl=document.getElementById('unprov-uid');
+  if(uidEl) uidEl.textContent='…';
+  const sub=document.getElementById('unprov-sub');
+  if(sub) sub.textContent=msg;
+  const m=document.getElementById('unprov-msg');
+  if(m) m.textContent='';
+}
+
 function showLogin(){
+  document.getElementById('screen-unprovisioned')?.classList.remove('open');
   document.getElementById('screen-login').classList.add('open');
   document.getElementById('login-cafe-name').textContent=(currentServerData?.icon||'☕')+' '+(currentServerData?.name||'Kafe 78');
   document.getElementById('login-server-sub').textContent='Masukkan PIN Anda';
@@ -1391,18 +1544,27 @@ document.getElementById('pin-keyboard-input')?.addEventListener('focus',()=>{
 
 async function doLogin(){
   const pin=pinBuffer;
-  // Akses developer kini lewat tombol "Developer" khusus di menu utama, bukan lewat PIN pad ini.
-  // Cek OTP di server yang dipilih
+  // PIN = LOCAL UI LOCK SAJA. Role sudah di-resolve dari staff/{uid} sebelum
+  // keypad ini tampil. Unlock tidak menambah, mengubah, atau memverifikasi
+  // hak akses apa pun — hanya membuka tampilan aplikasi di perangkat ini.
+  if(!currentUid){showPinError('Device belum tersambung');return;}
   try{
-    const snap=await sref('otp_pins').once('value');
-    const pins=snap.val()||{};
-    let role=null,pinKey=null;
-    for(const [k,d] of Object.entries(pins)){
-      if(d.pin===pin&&d.status==='active'){role=d.role;pinKey=k;break;}
+    const r=await resolveRoleFromDb(currentUid);
+    if(!r.ok){currentRole='';showUnprovisionedScreen(r.reason);return;}
+    if(r.role!==currentRole){
+      // Role berubah di server (mis. owner lowering hak akses) — ikuti server.
+      currentRole=r.role;
     }
-    if(!role){showPinError('PIN salah atau sudah kadaluarsa');return;}
-    await sref(`otp_pins/${pinKey}`).update({status:'used',usedAt:Date.now()});
-    currentRole=role;showApp(role);saveSession();
+    // Verifikasi PIN opsional: hanya lock perangkat ini. Kegagalan TIDAK mengubah role.
+    let ok=true;
+    try{
+      const snap=await db.ref(`staff/${currentUid}/lock_pin`).once('value');
+      const expected=snap.exists()?String(snap.val()||''):'';
+      if(expected) ok=(expected===pin);
+    }catch(e){ ok=true; } // tidak ada lock_pin / offline -> tidak mengunci
+    if(!ok){showPinError('PIN device salah');return;}
+    saveSession();
+    showApp(currentRole);
   }catch(e){showPinError('Koneksi gagal, coba lagi');}
 }
 
@@ -1449,6 +1611,7 @@ function updateConnStatusUI(connected){
 
 function showApp(role){
   document.getElementById('screen-login').classList.remove('open');
+  document.getElementById('screen-unprovisioned')?.classList.remove('open');
   const tb=document.getElementById('topbar');tb.classList.add('visible');
   document.getElementById('role-badge').textContent=role.toUpperCase();
   document.getElementById('role-badge').style.cssText='';
@@ -1457,7 +1620,7 @@ function showApp(role){
     (currentServerData?.icon||'☕')+' '+(serverName.length>14?serverName.slice(0,14)+'…':serverName);
   document.getElementById('chat-server-label').textContent=serverName;
 
-  const allowed=NAV_ACCESS[role];
+  const allowed=NAV_ACCESS[role]||[];
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('visible',allowed.includes(b.id.replace('nav-',''))));
   document.querySelectorAll('.owner-section').forEach(e=>e.style.display=(role==='owner')?'block':'none');
   document.getElementById('chat-bubble').classList.add('visible');
@@ -1468,6 +1631,7 @@ function showApp(role){
   switchView(FIRST_VIEW[role]);
   updateNavCounts();
   requestAnimationFrame(updateNavSlide);
+  if(role==='owner'){ loadStaffList(); renderPinMgmt(); }
   showToast(`Selamat datang, ${role}!`,'success');
 }
 
@@ -1511,8 +1675,11 @@ function attachServerScopedListeners(){
     updateNavCounts();
     touchSync();
   });
-  trackListener(sref('laporan'),'value',renderLaporan);
-  trackListener(sref('otp_pins'),'value',snap=>{otp_pins=snap.val()||{};renderPinMgmt();});
+  // laporan hanya dibaca role OWNER. Role lain tidak pernah mendownload
+  // omzet sama sekali. (otp_pins tidak lagi dibaca oleh aplikasi ini.)
+  if(currentRole==='owner'){
+    trackListener(sref('laporan'),'value',renderLaporan);
+  }
   trackListener(sref('settings/stok_mode'),'value',snap=>{stokMode=snap.val()||'fifo';updateModeBadge();});
   initChat(currentRole);
 }
@@ -1530,6 +1697,11 @@ function updateNavSlide(){
 }
 
 function switchView(v){
+  // Permission check: user hanya bisa membuka view yang diizinkan role-nya,
+  //apa pun yang diklik/dipanggil (nav, shortcut Alt+1..7, atau console).
+  const allowed=NAV_ACCESS[currentRole]||[];
+  if(v&&!allowed.includes(v)) v=FIRST_VIEW[currentRole]||allowed[0];
+  if(v)currentView=v;
   document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'));
   document.getElementById('view-'+v)?.classList.add('active');
@@ -1542,13 +1714,10 @@ window.addEventListener('resize',()=>requestAnimationFrame(updateNavSlide));
 function signOut(){
   clearSession();
   offAllListeners();
-  cart=[];currentRole='';pinBuffer='';otp_pins={};MASTER_MENU={};stokFIFO={};
-  document.getElementById('topbar').classList.remove('visible');
-  document.getElementById('chat-bubble').classList.remove('visible');
-  document.getElementById('topbar').querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('visible'));
-  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
-
-  showLogin(); // Langsung tampilkan login
+  stopChatListener();
+  cart=[];currentRole='';pinBuffer='';otp_pins={};MASTER_MENU={};stokFIFO={};currentView='';
+  hideAppUi();
+  showLogin(); // PIN = local UI lock; role tetap di-resolve ulang dari staff/{uid}
 }
 
 // ===== STOK MODE =====
@@ -1559,30 +1728,90 @@ function updateModeBadge(){
   const de=document.getElementById('mode-desc-text');
   if(bf){bf.className='mode-toggle-btn'+(stokMode==='fifo'?' active-fifo':'');ba.className='mode-toggle-btn'+(stokMode==='atomic'?' active-atomic':'');de.innerHTML=MODE_DESC[stokMode];}
 }
-async function setStokMode(mode){await sref('settings/stok_mode').set(mode);showToast(`Mode stok: ${mode.toUpperCase()}`,'info');}
+async function setStokMode(mode){if(!requireRole('owner'))return;await sref('settings/stok_mode').set(mode);showToast(`Mode stok: ${mode.toUpperCase()}`,'info');}
 
-// ===== PIN MANAGEMENT (Owner) =====
-function renderPinMgmt(){
+// ===== PIN DEVICE (UI LOCK) =====
+// PIN TIDAK lagi menentukan role dan tidak lagi disimpan sebagai tabel global
+// plaintext. PIN sekarang per-device (staff/{uid}/lock_pin) dan hanya
+// berfungsi sebagai "local UI lock" untuk membuka tampilan di perangkat ini.
+// Data otp_pins lama di database TIDAK dihapus (compat), tapi tidak lagi dibaca.
+async function setLockPin(uid){
+  if(!requireRole('owner'))return;
+  const pin=randPin6();
+  try{
+    await db.ref(`staff/${uid}/lock_pin`).set(pin);
+    showToast(`PIN ${uid.slice(0,10)}…: ${pin}`,'success');
+    renderPinMgmt();
+  }catch(e){showToast('Gagal set PIN device','error');}
+}
+async function clearLockPin(uid){
+  if(!requireRole('owner'))return;
+  try{
+    await db.ref(`staff/${uid}/lock_pin`).remove();
+    showToast('PIN device dihapus','info');
+    renderPinMgmt();
+  }catch(e){showToast('Gagal hapus PIN device','error');}
+}
+async function renderPinMgmt(){
   const el=document.getElementById('pin-mgmt-grid');if(!el)return;
-  el.innerHTML=STAFF_ROLES.map(r=>{
-    const active=Object.entries(otp_pins).find(([,d])=>d.role===r.key&&d.status==='active');
-    const pinKey=active?active[0]:null,pinData=active?active[1]:null;
-    const disp=pinData
-      ?`<div class="pin-code-display">${pinData.pin}</div><div class="pin-status active">● AKTIF</div>`
-      :`<div class="pin-code-display none">— — — —</div><div class="pin-status none">Belum ada PIN</div>`;
-    const rev=pinData?`<button class="revoke-pin-btn" onclick="revokePin('${pinKey}')">✕ BATALKAN</button>`:'';
-    return `<div class="pin-role-card"><div class="pin-role-icon">${r.icon}</div><div class="pin-role-label">${r.label}</div>${disp}<button class="gen-pin-btn" onclick="generatePin('${r.key}')">⟳ BUAT PIN</button>${rev}</div>`;
+  if(currentRole!=='owner'){el.innerHTML='';return;}
+  let all={};
+  try{ all=(await db.ref('staff').once('value')).val()||{}; }catch(e){}
+  const rows=Object.entries(all).map(([uid,d])=>({uid,...(d||{})}));
+  if(!rows.length){el.innerHTML='<div class="fifo-info">Belum ada device diprovision.</div>';return;}
+  el.innerHTML=rows.map(r=>{
+    const hasPin=!!r.lock_pin;
+    const disp=hasPin
+      ?`<div class="pin-code-display">${escapeHtml(String(r.lock_pin))}</div><div class="pin-status active">● PIN AKTIF</div>`
+      :`<div class="pin-code-display none">— — — —</div><div class="pin-status none">Tanpa PIN device</div>`;
+    const rev=hasPin?`<button class="revoke-pin-btn" onclick="clearLockPin('${r.uid}')">✕ BATALKAN</button>`:'';
+    return `<div class="pin-role-card"><div class="pin-role-icon">📱</div><div class="pin-role-label">${escapeHtml(r.name||'Staff')} · ${escapeHtml(String(r.role||'-').toUpperCase())}</div>${disp}<button class="gen-pin-btn" onclick="setLockPin('${r.uid}')">⟳ BUAT PIN</button>${rev}</div>`;
   }).join('');
 }
-async function generatePin(role){
-  const used=Object.values(otp_pins).filter(d=>d.status==='active').map(d=>d.pin);
-  const ex=Object.entries(otp_pins).filter(([,d])=>d.role===role&&d.status==='active');
-  for(const[k]of ex)await sref(`otp_pins/${k}`).remove();
-  const pin=randPin6(used);
-  await sref('otp_pins').push({role,pin,status:'active',createdAt:Date.now()});
-  showToast(`PIN ${role}: ${pin}`,'success');
+
+// ===== MANAJEMEN DEVICE / ROLE =====
+// staff/{uid} = {name, role, active, provisionedAt, provisionedBy}
+// Sumber kebenaran role. Ditulis hanya oleh owner (dijaga Firebase Rules di Step 3).
+async function provisionStaff(){
+  if(!requireRole('owner'))return;
+  const uid=(document.getElementById('staff-uid-input')?.value||'').trim();
+  const name=(document.getElementById('staff-name-input')?.value||'').trim()||'Staff';
+  const role=document.getElementById('staff-role-select')?.value||'waiter';
+  if(uid.length<10){showToast('UID tidak valid','error');return;}
+  if(!ALL_ROLES.includes(role)){showToast('Role tidak dikenal','error');return;}
+  try{
+    await db.ref(`staff/${uid}`).set({name,role,active:true,provisionedAt:Date.now(),provisionedBy:currentUid||null});
+    showToast(`${name} diprovision sebagai ${role}`,'success');
+    document.getElementById('staff-uid-input').value='';
+    document.getElementById('staff-name-input').value='';
+    loadStaffList();
+  }catch(e){showToast('Gagal provision. Periksa izin tulis.','error');}
 }
-async function revokePin(key){await sref(`otp_pins/${key}`).remove();showToast('PIN dibatalkan','info');}
+async function revokeStaff(uid){
+  if(!requireRole('owner'))return;
+  if(uid===currentUid){showToast('Tidak bisa mencabut akses device ini sendiri','error');return;}
+  if(!confirm('Cabut akses device ini?'))return;
+  try{
+    await db.ref(`staff/${uid}`).update({active:false,revokedAt:Date.now()});
+    showToast('Akses device dicabut','info');
+    loadStaffList();
+  }catch(e){showToast('Gagal mencabut akses','error');}
+}
+async function loadStaffList(){
+  const el=document.getElementById('staff-list-area');if(!el||currentRole!=='owner')return;
+  try{
+    const snap=await db.ref('staff').once('value');
+    const all=snap.val()||{};
+    const rows=Object.entries(all).map(([uid,d])=>({uid,...(d||{})}));
+    if(!rows.length){el.innerHTML='<div class="fifo-info">Belum ada device diprovision.</div>';return;}
+    el.innerHTML=rows.map(r=>{
+      const on=r.active===true;
+      return `<div class="prov-list-row"><div style="min-width:0;"><div style="font-weight:600;font-size:12px;">${escapeHtml(r.name||'Staff')} <span style="font-family:var(--mono);font-size:9px;color:var(--accent);">${escapeHtml(String(r.role||'-').toUpperCase())}</span></div><div style="font-family:var(--mono);font-size:8px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;">${escapeHtml(r.uid)}</div></div><div style="display:flex;align-items:center;gap:7px;flex-shrink:0;"><span class="pin-status ${on?'active':'none'}">${on?'● AKTIF':'○ NONAKTIF'}</span>${on&&r.uid!==currentUid?`<button class="revoke-pin-btn" onclick="revokeStaff('${r.uid}')">CABUT</button>`:''}</div></div>`;
+    }).join('');
+  }catch(e){
+    el.innerHTML='<div class="fifo-info">Gagal memuat daftar device (periksa izin baca).</div>';
+  }
+}
 
 // ===== MENU =====
 function renderMenu(){
@@ -1627,6 +1856,7 @@ function renderCart(){
 
 // ===== KIRIM PESANAN =====
 async function kirimPesanan(){
+  if(!requireRole(['waiter','owner']))return;
   const meja=document.getElementById('meja-input').value;
   if(!meja){showToast('Isi nomor meja dulu!','error');return;}
   if(!cart.length){showToast('Keranjang kosong!','error');return;}
@@ -1748,11 +1978,15 @@ function hitungKembalian(key,total){
   else{el.textContent='Rp '+fRp(change);el.className='change-val ok';btn.disabled=false;}
 }
 async function updateStatus(key,status,btnEl){
+  // Izin transisi status mengikuti view asal, bukan sekadar "sudah login".
+  if(status==='antar'&&!requireRole(['dapur','owner']))return;
+  if(status==='kasir'&&!requireRole(['waiter','antar','owner']))return;
   if(btnEl){btnEl.disabled=true;btnEl.textContent='...';}
   try{await sref('orders/'+key+'/status').set(status);}
   catch(e){showToast('Gagal update status','error');if(btnEl)btnEl.disabled=false;}
 }
 async function bayarDanCetak(key,total){
+  if(!requireRole(['kasir','owner']))return;
   const cash=parseInt(document.getElementById('cash-'+key).value);
   if(!cash||cash<total){showToast('Uang tidak cukup!','error');return;}
   const change=cash-total,btn=document.getElementById('pay-btn-'+key);
@@ -1772,6 +2006,7 @@ async function bayarDanCetak(key,total){
 
 // Pesanan yang sudah dibayar lewat web pemesanan online: langsung selesai, TIDAK masuk antrean kasir
 async function selesaikanOnline(key,btnEl){
+  if(!requireRole(['waiter','antar','owner']))return;
   if(btnEl){btnEl.disabled=true;btnEl.textContent='...';}
   try{
     const snap=await sref('orders/'+key).once('value');const o=snap.val();if(!o){showToast('Pesanan tidak ditemukan','error');if(btnEl)btnEl.disabled=false;return;}
@@ -1824,16 +2059,16 @@ function renderStokList(){
 }
 
 async function hapusBatchSatu(itemId,batchKey,currentQty){const ref=sref(`stok_fifo/${itemId}/${batchKey}`);if(currentQty>1)await ref.update({qty:currentQty-1});else await ref.remove();}
-async function hapusBatchSeluruh(itemId,batchKey,qty){if(!confirm(`Hapus batch (${qty} unit)?`))return;await sref(`stok_fifo/${itemId}/${batchKey}`).remove();showToast('Batch dihapus','info');}
+async function hapusBatchSeluruh(itemId,batchKey,qty){if(!requireRole('owner'))return;if(!confirm(`Hapus batch (${qty} unit)?`))return;await sref(`stok_fifo/${itemId}/${batchKey}`).remove();showToast('Batch dihapus','info');}
 function renderDropdown(){let h='';Object.keys(MASTER_MENU).forEach(id=>h+=`<option value="${id}">${MASTER_MENU[id].n}</option>`);document.getElementById('stok-item-select').innerHTML=h||'<option>— belum ada menu —</option>';}
 async function tambahStokBatch(){const id=document.getElementById('stok-item-select').value,q=parseInt(document.getElementById('stok-qty-input').value);if(!id||!q||q<=0){showToast('Pilih menu dan isi jumlah','error');return;}await sref('stok_fifo/'+id).push({qty:q,ts:Date.now()});document.getElementById('stok-qty-input').value='';showToast(`+${q} stok ditambahkan`,'success');}
 async function kurangiStokManual(){const id=document.getElementById('stok-item-select').value,qty=parseInt(document.getElementById('stok-qty-input').value);if(!id||!qty||qty<=0){showToast('Pilih menu dan isi jumlah','error');return;}const total=totalStok(id);if(qty>total){showToast(`Stok hanya tersisa ${total}!`,'error');return;}if(!confirm(`Hapus ${qty} stok dari ${MASTER_MENU[id].n}?`))return;try{await deductFIFO(id,qty);document.getElementById('stok-qty-input').value='';showToast(`−${qty} stok dihapus`,'info');}catch(e){showToast(e.message,'error');}}
 async function hapusSatuPersatu(id){const ref=sref(`stok_fifo/${id}`),snap=await ref.once('value');const b=[];snap.forEach(c=>{b.push({key:c.key,...c.val()});});b.sort((a,b)=>a.ts-b.ts);if(!b.length){showToast('Stok sudah kosong!','error');return;}const f=b[0];if(f.qty>1)await ref.child(f.key).update({qty:f.qty-1});else await ref.child(f.key).remove();}
-function tambahMasterMenu(){const n=document.getElementById('new-menu-name').value.trim(),h=parseInt(document.getElementById('new-menu-price').value);if(!n||!h||h<=0){showToast('Isi nama dan harga menu!','error');return;}sref('master_menu').push({n,h}).then(()=>{document.getElementById('new-menu-name').value='';document.getElementById('new-menu-price').value='';showToast(`Menu "${n}" didaftarkan!`,'success');});}
-function hapusMenu(id){if(!confirm(`Hapus menu "${MASTER_MENU[id].n}"?`))return;sref('master_menu/'+id).remove();sref('stok_fifo/'+id).remove();showToast('Menu dihapus','info');}
-function resetGudang(){if(!confirm('Reset semua stok?'))return;sref('stok_fifo').remove().then(()=>showToast('Stok direset','info'));}
-function resetLaporan(){if(!confirm('Hapus semua laporan?'))return;sref('laporan').remove().then(()=>showToast('Laporan direset','info'));}
-async function ownerResetOrders(){if(!confirm('Hapus semua pesanan aktif?'))return;await sref('orders').remove();showToast('Orders dihapus','info');}
+function tambahMasterMenu(){if(!requireRole('owner'))return;const n=document.getElementById('new-menu-name').value.trim(),h=parseInt(document.getElementById('new-menu-price').value);if(!n||!h||h<=0){showToast('Isi nama dan harga menu!','error');return;}sref('master_menu').push({n,h}).then(()=>{document.getElementById('new-menu-name').value='';document.getElementById('new-menu-price').value='';showToast(`Menu "${n}" didaftarkan!`,'success');});}
+function hapusMenu(id){if(!requireRole('owner'))return;if(!confirm(`Hapus menu "${MASTER_MENU[id].n}"?`))return;sref('master_menu/'+id).remove();sref('stok_fifo/'+id).remove();showToast('Menu dihapus','info');}
+function resetGudang(){if(!requireRole('owner'))return;if(!confirm('Reset semua stok?'))return;sref('stok_fifo').remove().then(()=>showToast('Stok direset','info'));}
+function resetLaporan(){if(!requireRole('owner'))return;if(!confirm('Hapus semua laporan?'))return;sref('laporan').remove().then(()=>showToast('Laporan direset','info'));}
+async function ownerResetOrders(){if(!requireRole('owner'))return;if(!confirm('Hapus semua pesanan aktif?'))return;await sref('orders').remove();showToast('Orders dihapus','info');}
 
 // ===== CHAT =====
 function initChat(role){
@@ -1856,6 +2091,9 @@ function listenChat(){
   chatListener=sref('chat').limitToLast(200).on('value',snap=>{
     const all=snap.val()||{};renderChatMessages(all);updateOwnerChatMonitor(all);updateDevChatMonitor(all);
   });
+}
+function stopChatListener(){
+  if(chatListener){try{sref('chat').off('value',chatListener);}catch(e){}chatListener=null;}
 }
 function renderChatMessages(allMsgs){
   const msgs=Object.entries(allMsgs).map(([k,v])=>({k,...v})).filter(m=>m.channel===currentChannel).sort((a,b)=>a.ts-b.ts);
@@ -1899,7 +2137,7 @@ function updateDevChatMonitor(allMsgs){
     msgs.map(m=>{const t=new Date(m.ts).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});if(m.type==='system')return '';return `<div style="padding:3px 0;border-bottom:1px solid var(--ink3);display:flex;gap:7px;align-items:baseline;"><span style="font-family:var(--mono);font-size:9px;color:var(--text2);">${t}</span><span style="font-family:var(--mono);font-size:9px;color:${roleColor(m.role)};">[${m.role}]</span><span style="font-size:9px;color:var(--text2);">${CHANNEL_LABELS[m.channel]?.label||m.channel}</span><span style="font-size:11px;flex:1;color:var(--text2);font-style:italic;">🔒 pesan privat</span></div>`;}).join('');
   el.scrollTop=el.scrollHeight;
 }
-async function clearAllChat(){if(!confirm('Hapus semua chat?'))return;await sref('chat').remove();showToast('Chat dihapus','info');}
+async function clearAllChat(){if(!requireRole('owner'))return;if(!confirm('Hapus semua chat?'))return;await sref('chat').remove();showToast('Chat dihapus','info');}
 
 // ===== LIVE TIMER =====
 setInterval(()=>{
@@ -1913,8 +2151,8 @@ document.addEventListener('input',e=>{if(e.target.id==='meja-input')renderCart()
 
 // Micro UX
 initMicroUX();
-// Coba pulihkan sesi login sebelumnya (device ini) — kalau ada & valid, langsung masuk tanpa PIN.
-restoreSession();
+// Catatan: tidak ada lagi restoreSession() yang memuat role dari localStorage.
+// Role selalu di-resolve ulang dari Firebase Auth UID -> staff/{uid}.
 </script>
 </body>
 </html>
